@@ -1,4 +1,6 @@
 # DEVS x SESA Beginner Hackathon 2026 😊
+Team member 1: Caini
+
 
 <p align="center">
   <img width="450" alt="header" src="public/read-me-header.png" />
