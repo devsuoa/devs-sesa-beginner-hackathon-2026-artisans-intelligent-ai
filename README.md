@@ -1,5 +1,5 @@
 # DEVS x SESA Beginner Hackathon 2026 😊
-Team member 1: Caini
+Team member 1: Caini, Danlei Li
 
 
 <p align="center">
