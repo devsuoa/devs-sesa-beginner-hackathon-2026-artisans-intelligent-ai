@@ -1,6 +1,7 @@
 /* 基础页面设置 */
 body {
-    background-color: #0b0c10; /* 深空背景色 */
+    background-image: url("public/WebBackground.png"); /* 深空背景色 */
+    background-size: cover;
     color: #66fcf1; /* 荧光文字色 */
     font-family: sans-serif;
     text-align: center;
@@ -28,7 +29,12 @@ body {
 
 #ship {
     position: absolute;
-    font-size: 30px;
+    width: 50px;
+    height: 50px;
+    background-image: url("public/Rocket.png");
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
     transition: all 1s ease; /* 飞船移动时的平滑动画 */
 }
 

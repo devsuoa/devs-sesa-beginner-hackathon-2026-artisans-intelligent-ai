@@ -137,6 +137,7 @@ function showScreen(screenId){
 }
 function renderMap() {
     const mapContainer = document.getElementById('screen-map');
+   
     if (!mapContainer) return;
 
     mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship">🚀</div>';
