@@ -307,6 +307,10 @@ body {
 #screen-map {
     /* 你的地图贴图路径 */
     background-image: url('assets/map.png'); 
+
+    /* 地图文字大小控制：后续只需要改这两个值 */
+    --map-title-size: 44px;
+    --planet-name-size: 20px;
     
     /* 核心代码：让图片自动缩放以填满整个容器，同时保持比例 */
     background-size: cover; 
@@ -321,6 +325,21 @@ body {
     width: 75%;
     height: 90vh; /* 占满整个屏幕高度 */
     position: relative;
+}
+
+#screen-map > h2 {
+    font-size: var(--map-title-size);
+    margin-top: 16px;
+    letter-spacing: 2px;
+}
+
+#screen-quiz {
+    --quiz-question-size: 36px;
+    --quiz-option-size: 24px;
+    --quiz-option-padding-y: 16px;
+    --quiz-option-padding-x: 20px;
+    --game-alert-size: 30px;
+    --achievement-name-size: 36px;
 }
 /* 修改或添加以下 CSS */
 .planet-icon {
@@ -379,7 +398,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     color: #66fcf1;
-    font-size: 14px;
+    font-size: var(--planet-name-size);
     white-space: nowrap;
     text-shadow: 2px 2px 4px #000;
 }
@@ -422,6 +441,118 @@ body {
     padding: 0 20px;
     text-align: center;
     margin-bottom: 20px;
+}
+
+.question-text {
+    font-size: var(--quiz-question-size);
+    line-height: 1.5;
+    font-weight: 700;
+}
+
+.options-container {
+    display: grid;
+    gap: 14px;
+    width: min(920px, 92%);
+    margin: 0 auto;
+}
+
+.option-btn {
+    font-size: var(--quiz-option-size);
+    padding: var(--quiz-option-padding-y) var(--quiz-option-padding-x);
+    color: #66fcf1;
+    background: rgba(11, 12, 16, 0.85);
+    border: 2px solid #45a29e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.option-btn:hover {
+    transform: translateY(-1px);
+    border-color: #66fcf1;
+    box-shadow: 0 0 14px rgba(102, 252, 241, 0.35);
+}
+
+.game-alert-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.game-alert-box {
+    max-width: min(760px, 92vw);
+    background: rgba(11, 12, 16, 0.95);
+    border: 3px solid #66fcf1;
+    border-radius: 12px;
+    padding: 22px 26px;
+    box-shadow: 0 0 22px rgba(102, 252, 241, 0.45);
+}
+
+#game-alert-text {
+    margin: 0;
+    text-align: center;
+    color: #66fcf1;
+    font-size: var(--game-alert-size);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.achievement-overlay {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    z-index: 3200;
+    pointer-events: none;
+}
+
+.achievement-card {
+    width: min(420px, 92vw);
+    background: linear-gradient(160deg, rgba(11, 12, 16, 0.98), rgba(18, 33, 40, 0.98));
+    border: 3px solid #f6d860;
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: left;
+    box-shadow: 0 0 24px rgba(246, 216, 96, 0.5);
+    animation: achievement-slide-in 0.35s ease-out;
+}
+
+@keyframes achievement-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+.achievement-badge {
+    margin: 0 0 10px;
+    color: #f6d860;
+    letter-spacing: 2px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+#achievement-name {
+    margin: 0;
+    color: #fff4b1;
+    font-size: var(--achievement-name-size);
+    line-height: 1.35;
+}
+
+.achievement-desc {
+    margin: 8px 0 0;
+    color: #66fcf1;
+    font-size: 16px;
 }
 /* --- 唯美流星雨特效 --- */
 

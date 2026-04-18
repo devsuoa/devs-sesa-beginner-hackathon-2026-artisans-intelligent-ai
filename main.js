@@ -127,14 +127,127 @@ let gameState = {
     currentPlanetIndex:0,
     currentQuestionIndex:0,
     currentPlanetQuestions: [],
+    correctStreak: 0,
+    streakAchievementUnlocked: false,
+    wrongAnswers: 0,
+    perfectRunAchievementUnlocked: false,
     totalPlanet:galaxyData.length,
     completedPlanets:0,
     shield: 3 // 新增：初始 3 点护盾
 };
 
+const STREAK_ACHIEVEMENT_NAME = "成就名（后期可改）";
+const PERFECT_RUN_ACHIEVEMENT_NAME = "全勤奖（后期可改）";
+
 function showScreen(screenId){
     document.querySelectorAll('.screen').forEach(el=>el.classList.add('hidden'));
     document.getElementById(screenId).classList.remove('hidden');
+}
+
+function showGameAlert(message, duration = 1400) {
+    let overlay = document.getElementById('game-alert-overlay');
+    let textEl = document.getElementById('game-alert-text');
+
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'game-alert-overlay';
+        overlay.className = 'game-alert-overlay hidden';
+
+        const box = document.createElement('div');
+        box.className = 'game-alert-box';
+
+        textEl = document.createElement('p');
+        textEl.id = 'game-alert-text';
+
+        box.appendChild(textEl);
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+    }
+
+    textEl.innerText = message;
+    overlay.classList.remove('hidden');
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            resolve();
+        }, duration);
+    });
+}
+
+function playAchievementSound() {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    const audioCtx = new AudioContextClass();
+    const notes = [523.25, 659.25, 783.99];
+
+    notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.value = freq;
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        const start = audioCtx.currentTime + index * 0.14;
+        const end = start + 0.12;
+
+        gainNode.gain.setValueAtTime(0.0001, start);
+        gainNode.gain.exponentialRampToValueAtTime(0.18, start + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.0001, end);
+
+        osc.start(start);
+        osc.stop(end);
+    });
+
+    setTimeout(() => {
+        audioCtx.close();
+    }, 900);
+}
+
+function showAchievementPopup(achievementName, duration = 2200) {
+    let overlay = document.getElementById('achievement-overlay');
+    let nameEl = document.getElementById('achievement-name');
+
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'achievement-overlay';
+        overlay.className = 'achievement-overlay hidden';
+
+        const card = document.createElement('div');
+        card.className = 'achievement-card';
+
+        const badge = document.createElement('p');
+        badge.className = 'achievement-badge';
+        badge.innerText = '成就完成';
+
+        nameEl = document.createElement('h3');
+        nameEl.id = 'achievement-name';
+
+        const desc = document.createElement('p');
+        desc.className = 'achievement-desc';
+        desc.innerText = '连续答对三道题';
+
+        card.appendChild(badge);
+        card.appendChild(nameEl);
+        card.appendChild(desc);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+    }
+
+    nameEl.innerText = achievementName;
+    overlay.classList.remove('hidden');
+    playAchievementSound();
+
+    return new Promise((resolve) => {
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            resolve();
+        }, duration);
+    });
 }
 function renderMap() {
     const mapContainer = document.getElementById('screen-map');
@@ -227,20 +340,24 @@ function loadQuestion() {
     optionsContainer.appendChild(btn);
   });
 }
-function completePlanet() {
+async function completePlanet() {
     const planet = galaxyData[gameState.currentPlanetIndex];
     planet.isCompleted = true; // 1. 标记完成
 
     gameState.completedPlanets++;
-    alert(`✨ 成功！${planet.name} 的能量已回收。`);
+    await showGameAlert(`✨ 成功！${planet.name} 的能量已回收。`);
 
     renderMap(); // 2. 🌟 重新渲染地图，这会触发上面 renderMap 里的 if(planet.isCompleted) 判断
     showScreen('screen-map'); // 3. 返回地图
     if (gameState.completedPlanets >= galaxyData.length) {
+        if (gameState.wrongAnswers === 0 && !gameState.perfectRunAchievementUnlocked) {
+            gameState.perfectRunAchievementUnlocked = true;
+            await showAchievementPopup(PERFECT_RUN_ACHIEVEMENT_NAME);
+        }
         showScreen('screen-win'); // 切换到结局屏
         playEndingCutscene();        // 播放结局动画
     } else {
-        alert(`${planet.name} 的能量已收集完毕！`);
+        await showGameAlert(`${planet.name} 的能量已收集完毕！`);
         showScreen('screen-map');
     }
 }
@@ -288,7 +405,7 @@ function playEndingCutscene() {
 
     showNextLine();
 }
-function checkAnswer(selectedIndex) {
+async function checkAnswer(selectedIndex) {
     const planet = galaxyData[gameState.currentPlanetIndex];
     const activeQuestions = gameState.currentPlanetQuestions.length > 0
         ? gameState.currentPlanetQuestions
@@ -298,14 +415,21 @@ function checkAnswer(selectedIndex) {
     // 🌟 核心逻辑：将玩家点击的索引 (selectedIndex) 与数据里的正确索引 (currentQ.answer) 进行对比
     if (selectedIndex === currentQ.answer) {
         // --- 情况 A: 答对了 ---
-        alert("🎉 正确！能量正在回收...");
+        gameState.correctStreak++;
+
+        if (gameState.correctStreak >= 3 && !gameState.streakAchievementUnlocked) {
+            gameState.streakAchievementUnlocked = true;
+            await showAchievementPopup(STREAK_ACHIEVEMENT_NAME);
+        }
+
+        await showGameAlert("🎉 正确！能量正在回收...");
         
         // 增加题目索引，准备下一题
         gameState.currentQuestionIndex++;
 
         // 检查是否该星球所有题都答完了
         if (gameState.currentQuestionIndex >= activeQuestions.length) {
-            completePlanet(); // 调用通关函数
+            await completePlanet(); // 调用通关函数
         } else {
             showQuestion(); // 显示下一题
         }
@@ -315,7 +439,9 @@ function checkAnswer(selectedIndex) {
         console.log("回答错误，当前护盾值:", gameState.shield);
         
         // 1. 扣除生命值/护盾
-        gameState.shield--; 
+        gameState.shield--;
+        gameState.correctStreak = 0;
+        gameState.wrongAnswers++;
 
         // 2. 立即更新左上角的 UI 显示（确保心形图标减少）
         if (typeof updateStatusBar === "function") {
@@ -329,7 +455,7 @@ function checkAnswer(selectedIndex) {
             showScreen('screen-lose'); 
         } else {
             // 如果还没死，弹个窗提醒一下
-            alert("警告：能量解析错误！护盾受损。");
+            await showGameAlert("警告：能量解析错误！护盾受损。");
         }
     }
 }
