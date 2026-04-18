@@ -2,7 +2,7 @@
 const galaxyData = [
   {
     id: 1,
-    name: "冰核星",
+    name: "WilliamLEE planet",
     position: { x: 10, y: 80 }, // 星球在地图上的位置 (百分比)
     isCompleted: false,
     image: "assets/planet1.png",
@@ -16,7 +16,7 @@ const galaxyData = [
   },
   {
     id: 2,
-    name: "熔岩星",
+    name: "Gerald planet",
     position: { x: 70, y: 20 }, 
     isCompleted: false,
     image: "assets/planet2.png",
@@ -30,7 +30,7 @@ const galaxyData = [
   },
   {
     id: 3,  
-    name: "风暴星",
+    name: "Peter planet",
     position: { x: 90, y: 50 },
     isCompleted: false,
     image: "assets/planet3.png",
@@ -44,7 +44,7 @@ const galaxyData = [
   },
   {
     id: 4,
-    name: "星爆星",
+    name: "Andrea planet",
     position: { x: 30, y: 30 }, 
     isCompleted: false,
     image: "assets/planet4.png",
@@ -58,7 +58,7 @@ const galaxyData = [
   },
   {
     id: 5,
-    name: "暗物质星",
+    name: "Kevin planet",
     position: { x: 80, y: 70 },
     isCompleted: false,
     image: "assets/planet5.png",

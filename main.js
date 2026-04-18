@@ -7,47 +7,148 @@ const prologueScript = [
     { 
         // 标记：这是 NPC
         role: "npc", 
-        name: "通讯器", 
+        name: "Ms Radio", 
         avatar: "assets/radio.png", 
-        text: "📡 收到加密通讯请求..." 
+        text: "📡 Due to continuous environmental destruction by humans, Earth will collapse in a few hundred years, and humanity will no longer be able to survive."
     },
     { 
+        // 标记：这是 NPC
         role: "npc", 
-        name: "基地指挥官", 
-        avatar: "assets/sample.png", 
-        text: "“舰长！地球生态系统即将崩溃... 核心能量已经见底。”" 
+        name: "Ms Radio", 
+        avatar: "assets/radio.png", 
+        text: "Forests have turned into deserts, sea levels are rising, food is becoming scarce, and disasters are approaching."
+    },
+    { 
+        // 标记：这是 NPC
+        role: "npc", 
+        name: "Ms Radio", 
+        avatar: "assets/radio.png", 
+        text: "Humans discover that on a distant planet, there exists a mysterious crystal that can save the world."
+    },
+    { 
+        // 标记：这是 NPC
+        role: "npc", 
+        name: "Ms Radio", 
+        avatar: "assets/radio.png", 
+        text: "We have decided to choose one creature as the captain to travel to an unknown planet, obtain the crystal, and save Earth."
+    },
+    { 
+        // 标记：这是 NPC
+        role: "npc", 
+        name: "Ms Radio", 
+        avatar: "assets/radio.png", 
+        text: "Hello. You have been selected as the captain."
     },
     { 
         // 标记：这是主角（你）！
         role: "player", 
-        name: "主角 (你)", 
+        name: "You", 
         avatar: "assets/main.png", // 指向你设计的主角贴图
-        text: "“收到，这里是星际巡航号。地球目前的情况严重吗？”" 
+        text: "！！" 
+    },
+    { 
+        // 标记：这是 NPC
+        role: "npc", 
+        name: "Ms Radio", 
+        avatar: "assets/radio.png", 
+        text: "You will soon travel to an unknown planet and complete a series of challenges to obtain the mysterious crystal."
     },
     { 
         role: "npc", 
-        name: "基地指挥官", 
+        name: "Main Base Commander", 
         avatar: "assets/sample.png", 
-        text: "“唯有提取纯净的星爆能量才能拯救我们！全人类的希望都寄托在你身上了，立刻启程！”" 
+        text: "Yes. You will have three chances. Your success or failure will lead to different outcomes." 
     },
     { 
+        role: "npc", 
+        name: "Main Base Commander", 
+        avatar: "assets/sample.png", 
+        text: "There are multiple planetary challenges. Once you complete a planet’s challenge, you cannot return to that planet again. So choose carefully."
+    },
+    { 
+        role: "npc", 
+        name: "Main Base Commander", 
+        avatar: "assets/sample.png", 
+        text: "Only when your progress reaches 100% will you successfully obtain the crystal."
+    },
+    { 
+        // 标记：这是主角（你）！
         role: "player", 
-        name: "主角 (你)", 
-        avatar: "assets/main.png", 
-        text: "“明白。引擎全开，目标：未知星系。出发！”" 
+        name: "You", 
+        avatar: "assets/main.png", // 指向你设计的主角贴图
+        text: "Alright. I will do my best to complete the challenges, obtain the crystal, and save the world!" 
+    },
+    { 
+        role: "npc", 
+        name: "Main Base Commander", 
+        avatar: "assets/sample.png", 
+        text: "Good luck! Believe in yourself!" 
     }
 ];
 
 // 2. 升级后的打字机函数
 // 全新的打字机函数：带瀑布流和历史保留功能
+let isDialogueSkipped = false;
+let typingIntervalId = null;
+let nextLineTimeoutId = null;
+let revealCurrentLine = null;
+
+function isPrologueVisible() {
+    const prologue = document.getElementById('screen-prologue');
+    return !!prologue && !prologue.classList.contains('hidden');
+}
+
+function revealCurrentDialogueLine() {
+    if (!isPrologueVisible()) return;
+    if (typeof revealCurrentLine === 'function') {
+        revealCurrentLine();
+    }
+}
+
+function handlePrologueKeydown(event) {
+    if (event.code !== 'Space') return;
+    if (!isPrologueVisible()) return;
+
+    event.preventDefault();
+    revealCurrentDialogueLine();
+}
+
+function handlePrologueClick(event) {
+    if (!isPrologueVisible()) return;
+
+    const target = event.target;
+    if (target instanceof HTMLElement) {
+        if (target.closest('#skip-prologue-btn') || target.closest('#start-btn')) {
+            return;
+        }
+    }
+
+    revealCurrentDialogueLine();
+}
+
 function startDialogue(scriptArray) {
     let currentLine = 0;
     const historyContainer = document.getElementById("dialogue-history");
     historyContainer.innerHTML = ""; // 每次开始前清空历史
+    document.getElementById("start-btn")?.classList.add("hidden");
+    isDialogueSkipped = false;
+    revealCurrentLine = null;
+
+    if (typingIntervalId) {
+        clearInterval(typingIntervalId);
+        typingIntervalId = null;
+    }
+    if (nextLineTimeoutId) {
+        clearTimeout(nextLineTimeoutId);
+        nextLineTimeoutId = null;
+    }
 
     function typeNextLine() {
+        if (isDialogueSkipped) return;
+
         // 如果剧本播完了
         if (currentLine >= scriptArray.length) {
+            revealCurrentLine = null;
             document.getElementById("start-btn").classList.remove("hidden");
             return;
         }
@@ -97,17 +198,41 @@ function startDialogue(scriptArray) {
 
         // === 2. 开始在这一个新的 P 标签里打字 ===
         let charIndex = 0;
-        const timer = setInterval(() => {
+        let lineFinished = false;
+
+        revealCurrentLine = function() {
+            if (lineFinished || !typingIntervalId || isDialogueSkipped) return;
+
+            clearInterval(typingIntervalId);
+            typingIntervalId = null;
+            textEl.textContent = line.text;
+            charIndex = line.text.length;
+            lineFinished = true;
+            avatarImg.classList.remove("talking");
+
+            currentLine++;
+            nextLineTimeoutId = setTimeout(typeNextLine, 1000);
+        };
+
+        typingIntervalId = setInterval(() => {
+            if (isDialogueSkipped) {
+                clearInterval(typingIntervalId);
+                typingIntervalId = null;
+                return;
+            }
+
             if (charIndex < line.text.length) {
-                textEl.innerHTML += line.text.charAt(charIndex);
+                textEl.textContent += line.text.charAt(charIndex);
                 charIndex++;
             } else {
                 // 这行字打完了
-                clearInterval(timer);
+                clearInterval(typingIntervalId);
+                typingIntervalId = null;
+                lineFinished = true;
                 avatarImg.classList.remove("talking"); // 停止抖动
                 
                 currentLine++;
-                setTimeout(typeNextLine, 1000); // 停顿 1 秒后开始下一句
+                nextLineTimeoutId = setTimeout(typeNextLine, 1000); // 停顿 1 秒后开始下一句
             }
         }, 50); // 打字速度：50毫秒/字
     }
@@ -115,10 +240,32 @@ function startDialogue(scriptArray) {
     // 启动第一行
     typeNextLine();
 }
+
+function skipPrologue() {
+    isDialogueSkipped = true;
+    revealCurrentLine = null;
+
+    if (typingIntervalId) {
+        clearInterval(typingIntervalId);
+        typingIntervalId = null;
+    }
+    if (nextLineTimeoutId) {
+        clearTimeout(nextLineTimeoutId);
+        nextLineTimeoutId = null;
+    }
+
+    startGame();
+}
+
 // 页面加载后启动
 window.onload = function() {
     // 如果有这个函数，就执行跳转（确保你在序章界面）
     if (typeof showScreen === "function") showScreen('screen-prologue');
+
+    document.removeEventListener('keydown', handlePrologueKeydown);
+    document.removeEventListener('click', handlePrologueClick);
+    document.addEventListener('keydown', handlePrologueKeydown);
+    document.addEventListener('click', handlePrologueClick);
     
     // 启动对话
     startDialogue(prologueScript);
@@ -136,8 +283,8 @@ let gameState = {
     shield: 3 // 新增：初始 3 点护盾
 };
 
-const STREAK_ACHIEVEMENT_NAME = "成就名（后期可改）";
-const PERFECT_RUN_ACHIEVEMENT_NAME = "全勤奖（后期可改）";
+const STREAK_ACHIEVEMENT_NAME = "THREE IN A ROW!";
+const PERFECT_RUN_ACHIEVEMENT_NAME = "U ACTUALLY GENIUS!";
 
 function showScreen(screenId){
     document.querySelectorAll('.screen').forEach(el=>el.classList.add('hidden'));
@@ -222,14 +369,14 @@ function showAchievementPopup(achievementName, duration = 2200) {
 
         const badge = document.createElement('p');
         badge.className = 'achievement-badge';
-        badge.innerText = '成就完成';
+        badge.innerText = 'Achievement Unlocked';
 
         nameEl = document.createElement('h3');
         nameEl.id = 'achievement-name';
 
         const desc = document.createElement('p');
         desc.className = 'achievement-desc';
-        desc.innerText = '连续答对三道题';
+        desc.innerText = 'three correct answers in a row!';
 
         card.appendChild(badge);
         card.appendChild(nameEl);
@@ -254,7 +401,7 @@ function renderMap() {
    
     if (!mapContainer) return;
 
-    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship">🚀</div>';
+    mapContainer.innerHTML = '<h2>SPACE MAP</h2><div id="ship" class="pixel-ship">🚀</div>';
 
     galaxyData.forEach((planet, index) => {
         if (!planet || !planet.position) return;
@@ -291,8 +438,8 @@ function renderMap() {
     // 3. 渲染地球 (保持你之前的代码)
     const earthEl = document.createElement('div');
     earthEl.className = 'planet-icon earth-icon';
-    earthEl.innerHTML = `<img src="assets/earth.png" alt="地球">`;
-    earthEl.innerHTML += `<span class="planet-label">地球</span>`;
+    earthEl.innerHTML = `<img src="assets/earth.png" alt="Earth">`;
+    earthEl.innerHTML += `<span class="planet-label">Earth</span>`;
     earthEl.style.left = "50%";
     earthEl.style.top = "50%";
     earthEl.onclick = (e) => {
@@ -303,49 +450,12 @@ function renderMap() {
     mapContainer.appendChild(earthEl);
 }
 
-// 开始答题
-function startPlanet(index) {
-    gameState.currentPlanetIndex = index;
-    const planet = galaxyData[index];
-
-    document.getElementById('planet-name').innerText = planet.name;
-    
-    // 🌟 重点检查这一行！
-    // 你的数据里并没有 'description' 字段，如果你写了这一行，页面就会显示 undefined
-    // 如果你想显示描述，需要在 data.js 里给每个星球加上 description: "xxx"
-    const descEl = document.getElementById('planet-desc');
-    if (descEl) {
-        descEl.innerText = planet.description || "正在通过远程通讯频道扫描星球详细信息...";
-    }
-
-    gameState.currentQuestionIndex = 0;
-    showQuestion();
-    showScreen('screen-quiz');
-}
-
-function loadQuestion() {
-  const planet = galaxyData[gameState.currentPlanetIndex];
-  const questionData = planet.questions[gameState.currentQuestionIndex];
-
-  document.getElementById('question-text').innerText = questionData.q;
-  
-  const optionsContainer = document.getElementById('options-container');
-  optionsContainer.innerHTML = ''; 
-  
-  questionData.options.forEach((optionText, index) => {
-    let btn = document.createElement('button');
-    btn.innerText = optionText;
-    btn.style.margin = "10px";
-    btn.onclick = () => checkAnswer(index, questionData.answer);
-    optionsContainer.appendChild(btn);
-  });
-}
 async function completePlanet() {
     const planet = galaxyData[gameState.currentPlanetIndex];
     planet.isCompleted = true; // 1. 标记完成
 
     gameState.completedPlanets++;
-    await showGameAlert(`✨ 成功！${planet.name} 的能量已回收。`);
+    await showGameAlert(`✨ Success! ${planet.name} energy has been collected.`);
 
     renderMap(); // 2. 🌟 重新渲染地图，这会触发上面 renderMap 里的 if(planet.isCompleted) 判断
     showScreen('screen-map'); // 3. 返回地图
@@ -357,7 +467,7 @@ async function completePlanet() {
         showScreen('screen-win'); // 切换到结局屏
         playEndingCutscene();        // 播放结局动画
     } else {
-        await showGameAlert(`${planet.name} 的能量已收集完毕！`);
+        await showGameAlert(`${planet.name} energy has been collected!`);
         showScreen('screen-map');
     }
 }
@@ -370,13 +480,13 @@ function playEndingCutscene() {
     const container = endingScreen.querySelector('.ending-content');
 
     const lines = [
-        "2026年，最后一颗能量核心归位。",
-        "大气层的尘埃开始散去...",
-        "久违的阳光重新穿透云层，洒向荒芜的海床。",
-        "指挥官，你看。",
-        "那一抹绿色，是生命重新萌芽的信号。",
-        "感谢你，孤独的领航者。",
-        "地球，复苏了。"
+        "In 2026, the last energy core has been placed.",
+        "Dust in the atmosphere begins to settle...",
+        "The long-awaited sunlight pierces through the clouds, shining upon the desolate seabed.",
+        "Commander, look.",
+        "That hint of green is the signal of life rebirthing.",
+        "Thank you, the lone navigator.",
+        "Earth, has been reborn."
     ];
 
     let lineIndex = 0;
@@ -397,7 +507,7 @@ function playEndingCutscene() {
             // 全部播完后，显示“回到标题”或者“重新开始”按钮
             const btn = document.createElement('button');
             btn.className = 'restart-btn';
-            btn.innerText = "✨ 开启新篇章";
+            btn.innerText = "✨ Start New Chapter";
             btn.onclick = () => location.reload(); // 刷新网页重置游戏
             container.appendChild(btn);
         }
@@ -422,7 +532,7 @@ async function checkAnswer(selectedIndex) {
             await showAchievementPopup(STREAK_ACHIEVEMENT_NAME);
         }
 
-        await showGameAlert("🎉 正确！能量正在回收...");
+        await showGameAlert("🎉 Correct! Energy is being collected...");
         
         // 增加题目索引，准备下一题
         gameState.currentQuestionIndex++;
@@ -436,7 +546,7 @@ async function checkAnswer(selectedIndex) {
     } else {
         // --- 情况 B: 答错了 ---
         // --- 情况 B: 答错了 ---
-        console.log("回答错误，当前护盾值:", gameState.shield);
+        console.log("Answer incorrect, current shield value:", gameState.shield);
         
         // 1. 扣除生命值/护盾
         gameState.shield--;
@@ -450,12 +560,12 @@ async function checkAnswer(selectedIndex) {
 
         // 3. 检查是否死亡
         if (gameState.shield <= 0) {
-            console.log("护盾归零，进入失败界面");
+            console.log("Shield depleted, transitioning to failure screen");
             // 跳转到失败界面
             showScreen('screen-lose'); 
         } else {
             // 如果还没死，弹个窗提醒一下
-            await showGameAlert("警告：能量解析错误！护盾受损。");
+            await showGameAlert("Warning: Energy parsing error! Shield damaged.");
         }
     }
 }
@@ -472,67 +582,32 @@ function updateStatusBar() {
 }
 // ...后面的代码
 
-function finishPlanet() {
-  galaxyData[gameState.currentPlanetIndex].isCompleted = true;
-  gameState.completedPlanets++;
-  // ...前面的代码
-  let progressPercentage = Math.floor((gameState.completedPlanets / galaxyData.length) * 100);
-  
-  if (progressPercentage >= 100) {
-    // === 判断通关跳转 ===
-    document.getElementById('status-bar').classList.add('hidden'); // 隐藏血条
-    showScreen('screen-win'); // 跳转到成功结局界面
-  } else {
-    // 没通关，显示当前进度弹窗
-    document.getElementById('progress-text').innerText = `${progressPercentage}%`;
-    document.getElementById('modal-progress').classList.remove('hidden');
-  }
-// ...后面的代码
+function returnToMap() {
+    document.getElementById('modal-progress').classList.add('hidden');
+    renderMap();
+    showScreen('screen-map');
 }
 
-function returnToMap() {
-  document.getElementById('modal-progress').classList.add('hidden');
-  renderMap(); 
-  showScreen('screen-map');
-}
 // main.js 里原本就该有的 startGame 函数
 function startGame() {
     // 隐藏状态栏（如果你加了护盾机制）
     const statusBar = document.getElementById('status-bar');
     if (statusBar) statusBar.classList.add('hidden'); // 序章不显示血条
-    
+
     // 跳转到地图界面
     showScreen('screen-map');
-    statusBar.classList.remove('hidden'); // 进入地图界面时显示血条
+
+    if (statusBar) {
+        statusBar.classList.remove('hidden'); // 进入地图界面时显示血条
+    }
+
     // 渲染地图
     renderMap();
 }
+
 // 页面加载完毕后，立刻渲染地图
 //window.onload = startGame;
 
-function finishPlanet() {
-  galaxyData[gameState.currentPlanetIndex].isCompleted = true;
-  gameState.completedPlanets++;
-  let progressPercentage = Math.floor((gameState.completedPlanets / galaxyData.length) * 100);
-  
-  if (progressPercentage >= 100) {
-    // === 判断通关跳转 ===
-    document.getElementById('status-bar').classList.add('hidden'); // 隐藏血条
-    showScreen('screen-win'); // 跳转到成功结局界面
-  } else {
-    // === 没通关，显示当前进度弹窗 ===
-    // 1. 更新弹窗里的百分比数字
-    document.getElementById('progress-text').innerText = `${progressPercentage}%`;
-    // 2. 显示弹窗
-    document.getElementById('modal-progress').classList.remove('hidden');
-    
-    // ⛔⛔⛔ 绝对不能有 showScreen(''); 这一行！如果有，一定要删掉！⛔⛔⛔
-  }
-  // main.js 渲染地图的部分逻辑参考
-
-// --- 补上这个函数 ---
-
-}
 function updateEarthStatus() {
     // 1. 获取当前修复进度
     // 这里的进度逻辑要和你游戏里的变量名一致，比如 gameState.completedPlanets
@@ -554,13 +629,13 @@ function updateEarthStatus() {
     // 3. 根据进度改变描述和贴图
     if (earthDesc && earthImg) {
         if (progress === 0) {
-            earthDesc.innerText = "“地球目前一片死寂，只有微弱的求救信号...”";
+            earthDesc.innerText = "Earth is on the brink of collapse, but hope is not lost. Let's start the journey to save our home!";
             earthImg.src = "assets/earth-level1.png"; 
         } else if (progress < 100) {
-            earthDesc.innerText = "“能量正在汇聚，生态系统显示出复苏的迹象！”";
+            earthDesc.innerText = "Energy is gathering, and the ecosystem is showing signs of recovery!";
             earthImg.src = "assets/earth-level2.png"; 
         } else {
-            earthDesc.innerText = "“奇迹发生了！地球重新焕发了蓝色生机！”";
+            earthDesc.innerText = "Miraculously, Earth has been fully repaired! The sun shines again, and life flourishes. Thank you, brave navigator!";
             earthImg.src = "assets/earth-level3.png"; 
         }
     }
@@ -568,34 +643,48 @@ function updateEarthStatus() {
 // 这个函数负责：点击星球 -> 切换到答题页面
 function startPlanet(index) {
     console.log("正在启动星球关卡，索引：", index);
-    
+
     // 1. 设置当前正在挑战的星球数据
     gameState.currentPlanetIndex = index;
     const planet = galaxyData[index];
 
     // 2. 更新答题界面的文字和图片
-    const nameEl = document.getElementById('planet-name').innerText = planet.name;
-    /*const descEl = document.getElementById('planet-desc');*/
-    const bigImgEl = document.getElementById('planet-big-img').src = planet.image;
+    const nameEl = document.getElementById('planet-name');
+    const bigImgEl = document.getElementById('planet-big-img');
 
     if (nameEl) nameEl.innerText = planet.name;
-    /*if (descEl) descEl.innerText = planet.description;*/
     if (bigImgEl) bigImgEl.src = planet.image;
 
     // 3. 重置题目进度
     gameState.currentQuestionIndex = 0;
-    gameState.currentPlanetQuestions = [...planet.questions]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 2);
-    
+
+    // 从题库中随机选出两个不同索引的题目
+    const questionCount = planet.questions.length;
+    if (questionCount >= 2) {
+        const randomIndex1 = Math.floor(Math.random() * questionCount);
+        let randomIndex2 = Math.floor(Math.random() * questionCount);
+        // 确保第二个索引和第一个不同
+        while (randomIndex2 === randomIndex1) {
+            randomIndex2 = Math.floor(Math.random() * questionCount);
+        }
+        gameState.currentPlanetQuestions = [
+            planet.questions[randomIndex1],
+            planet.questions[randomIndex2]
+        ];
+    } else {
+        // 题库少于 2 题时，直接用所有题目
+        gameState.currentPlanetQuestions = [...planet.questions];
+    }
+
     // 4. 显示第一道题
     if (typeof showQuestion === "function") {
         showQuestion();
     }
-    
+
     // 5. 切换屏幕
     showScreen('screen-quiz');
 }
+
 function showQuestion() {
     const planet = galaxyData[gameState.currentPlanetIndex];
     const activeQuestions = gameState.currentPlanetQuestions.length > 0
@@ -610,7 +699,7 @@ function showQuestion() {
     // 🛡️ 安全检查：如果页面上没有这个 ID，就在控制台报错，而不是让程序崩溃
     if (!questionTextEl) {
         console.error("错误：在 HTML 中找不到 ID 为 'question-text' 的元素！");
-        return; 
+        return;
     }
     if (!optionsContainer) {
         console.error("错误：在 HTML 中找不到 ID 为 'options-container' 的元素！");
@@ -652,9 +741,8 @@ function toggleMusic() {
             .catch(err => {
                 console.warn("播放请求被浏览器拦截:", err);
             });
-    } 
-    // 如果音乐正在播放，就暂停它
-    else {
+    } else {
+        // 如果音乐正在播放，就暂停它
         bgm.pause();
         musicIcon.innerText = "🔇"; // 切换回静音图标
     }

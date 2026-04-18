@@ -63,7 +63,7 @@ body {
 }
 
 #shield-display {
-    letter-spacing: 5px; /* 让红心之间有空隙 */
+    letter-spacing: 3px; /* 让红心之间有空隙 */
 }
 
 /* style.css 新增样式 */
@@ -296,6 +296,38 @@ body {
     display: block;
     margin: 30px auto;       /* 上下留白并水平居中 */
     transition: transform 0.2s; /* 增加缩放动画 */
+}
+
+.prologue-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+#screen-prologue {
+    position: relative;
+}
+
+#skip-prologue-btn {
+    padding: 12px 22px;
+    font-size: 18px;
+    background-color: rgba(11, 12, 16, 0.85);
+    color: #66fcf1;
+    border: 3px solid #45a29e;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 2200;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+#skip-prologue-btn:hover {
+    transform: scale(1.06);
+    border-color: #66fcf1;
 }
 
 /* 鼠标悬停时的效果：稍微变大一点，更有交互感 */
@@ -644,4 +676,29 @@ body {
 
 #audio-control:hover {
     background: rgba(102, 252, 243, 0.4);
+}
+
+/* 地球状态页面的贴图容器 - 与地图尺寸保持一致 */
+.earth-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-height: calc(100vh - 80px);
+}
+
+.earth-visual {
+    width: 75%;
+    max-width: 900px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    /*border: 2px solid #45a29e;*/
+}
+
+#earth-large-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
 }
