@@ -31,9 +31,17 @@
     </section>
 
     <section id="screen-quiz" class="screen hidden">
-      <h2 id="planet-name">星球名字</h2>
-      <img id="planet-big-img" src="" alt="星球展示" style="width: 200px; height: 200px; image-rendering: pixelated;">
-      <p id="planet-desc">描述文字...</p>
+      <div class="quiz-header">
+        <h2 id="planet-name">星球名字</h2>
+        <div class="planet-avatar">
+          <img id="planet-big-img" src="" alt="星球展示">
+        </div>
+      </div>
+
+      <p id="planet-desc" class="planet-description"></p>
+      <p id="question-text" class="question-text">题目加载中...</p>
+
+      <div id="options-container" class="options-container"></div>
     </section>
     <section id="screen-earth-status" class="screen hidden">
       <h2>🌍 地球当前状态</h2>

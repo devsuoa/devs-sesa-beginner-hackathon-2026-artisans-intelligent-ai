@@ -330,9 +330,25 @@ body {
     transition: transform 0.2s ease;
 }
 
+
 .planet-icon:hover img {
     transform: scale(1.2); /* 鼠标移上去轻轻放大 */
     filter: drop-shadow(0 0 8px #66fcf1); /* 增加光晕 */
+}
+.planet-icon.locked {
+    cursor: not-allowed; /* 鼠标变成禁用图标 */
+}
+
+/* 🌟 锁定状态下的悬停效果：红光 */
+.planet-icon.locked:hover img {
+    transform: scale(1.0); /* 锁定后不再放大，或者保持原样 */
+    filter: drop-shadow(0 0 10px #ff4b2b); /* 红色光晕 */
+}
+
+/* 可以让锁定后的星球稍微变暗一点，增加视觉区分 */
+.planet-icon.locked img {
+    opacity: 0.7;
+    filter: grayscale(0.5); 
 }
 
 /* 修改名字标签的位置，防止被大图盖住 */
@@ -345,4 +361,44 @@ body {
     font-size: 14px;
     white-space: nowrap;
     text-shadow: 2px 2px 4px #000;
+}
+
+/* style.css */
+
+/* 答题页顶部的头部区域 */
+.quiz-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* 居中 */
+    gap: 10px; /* 名字和图片之间的间距 */
+    margin-bottom: 20px; /* 和下方题目的距离 */
+}
+
+/* 🌟 约束星球图标的容器大小 */
+.planet-avatar {
+    width: 100px;  /* 你想要的大小，比如 100px */
+    height: 100px;
+    border-radius: 50%; /* 做成圆形（可选） */
+    background: rgba(102, 252, 243, 0.1); /* 加一个淡淡的背景光晕 */
+    border: 2px solid #66fcf1; /* 青色边框 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* 裁剪多余部分 */
+    box-shadow: 0 0 15px rgba(102, 252, 243, 0.5); /* 发光效果 */
+}
+
+/* 🌟 核心：让图片完全适应容器，不溢出 */
+#planet-big-img {
+    width: 90%; /* 比容器稍小一点，露出边框 */
+    height: 90%;
+    object-fit: contain; /* 保持比例，不拉伸 */
+    image-rendering: pixelated; /* 保持像素清晰 */
+}
+
+/* 优化题目文字样式，防止贴边 */
+.planet-description, .question-text {
+    padding: 0 20px;
+    text-align: center;
+    margin-bottom: 20px;
 }
