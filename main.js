@@ -275,16 +275,118 @@ let gameState = {
     currentQuestionIndex:0,
     currentPlanetQuestions: [],
     correctStreak: 0,
-    streakAchievementUnlocked: false,
     wrongAnswers: 0,
-    perfectRunAchievementUnlocked: false,
     totalPlanet:galaxyData.length,
     completedPlanets:0,
+    unlockedAchievements: {},
     shield: 3 // 新增：初始 3 点护盾
 };
 
-const STREAK_ACHIEVEMENT_NAME = "THREE IN A ROW!";
-const PERFECT_RUN_ACHIEVEMENT_NAME = "U ACTUALLY GENIUS!";
+const ACHIEVEMENTS = {
+    streak3: {
+        id: 'streak3',
+        name: 'THREE IN A ROW!',
+        description: 'Three correct answers in a row.'
+    },
+    perfectRun: {
+        id: 'perfectRun',
+        name: 'U ACTUALLY GENIUS!',
+        description: 'correctly answer all the questions'
+    },
+    williamFollower: {
+        id: 'williamFollower',
+        name: "William's follower",
+        description: 'Nothing stopping u'
+    },
+    firstPlanet: {
+        id: 'firstPlanet',
+        name: 'First Contact',
+        description: 'Complete your first planet.'
+    },
+    triExplorer: {
+        id: 'triExplorer',
+        name: 'Tri Explorer',
+        description: 'Complete any 3 planets.'
+    },
+    allPlanets: {
+        id: 'allPlanets',
+        name: 'Galaxy Surveyor',
+        description: 'Complete all planets.'
+    }
+};
+
+const ENDING_CONFIG = {
+    good: {
+        background: 'assets/he.png',
+        title: 'Good Ending: Earth Reborn',
+        lines: [
+            'The final crystal has been activated.',
+            'Oceans calm down, and ruined forests begin to breathe again.',
+            'Across the horizon, cities light up one by one.',
+            'You completed the mission and gave Earth another future.'
+        ]
+    },
+    bad: {
+        background: 'assets/be.png',
+        title: 'Bad Ending: Signal Lost',
+        lines: [
+            'The shield is gone, and the ship falls silent.',
+            'The rescue route collapses before the final transfer.',
+            'Earth waits in darkness as the signal fades away.',
+            'This chapter ends here, but another attempt can still change fate.'
+        ]
+    }
+};
+
+function showEnding(type) {
+    const endingScreen = document.getElementById('screen-ending');
+    const endingTitle = document.getElementById('ending-title');
+    const endingText = document.getElementById('ending-text');
+    const config = ENDING_CONFIG[type] || ENDING_CONFIG.bad;
+
+    if (!endingScreen || !endingTitle || !endingText) return;
+
+    endingTitle.innerText = config.title;
+    endingText.innerHTML = config.lines.map((line) => `<p>${line}</p>`).join('');
+    endingScreen.style.backgroundImage = `url("${config.background}")`;
+
+    const statusBar = document.getElementById('status-bar');
+    if (statusBar) statusBar.classList.add('hidden');
+
+    showScreen('screen-ending');
+}
+
+function openAchievementScreen() {
+    const unlockedBox = document.getElementById('achievements-unlocked');
+    const lockedBox = document.getElementById('achievements-locked');
+    if (!unlockedBox || !lockedBox) return;
+
+    unlockedBox.innerHTML = '';
+    lockedBox.innerHTML = '';
+
+    const achievementList = Object.values(ACHIEVEMENTS);
+    achievementList.forEach((achievement) => {
+        const unlocked = !!gameState.unlockedAchievements[achievement.id];
+        const targetBox = unlocked ? unlockedBox : lockedBox;
+
+        const item = document.createElement('div');
+        item.className = `achievement-item ${unlocked ? 'unlocked' : 'locked'}`;
+
+        const name = document.createElement('p');
+        name.className = 'achievement-item-name';
+        name.innerText = unlocked ? achievement.name : '???';
+
+        const desc = document.createElement('p');
+        desc.className = 'achievement-item-desc';
+        desc.innerText = unlocked ? achievement.description : 'Unlock this achievement to reveal details.';
+
+        item.appendChild(name);
+        item.appendChild(desc);
+        targetBox.appendChild(item);
+    });
+
+    showScreen('screen-achievements');
+}
 
 function showScreen(screenId){
     document.querySelectorAll('.screen').forEach(el=>el.classList.add('hidden'));
@@ -355,9 +457,10 @@ function playAchievementSound() {
     }, 900);
 }
 
-function showAchievementPopup(achievementName, duration = 2200) {
+function showAchievementPopup(achievement, duration = 2200) {
     let overlay = document.getElementById('achievement-overlay');
     let nameEl = document.getElementById('achievement-name');
+    let descEl = document.getElementById('achievement-popup-desc');
 
     if (!overlay) {
         overlay = document.createElement('div');
@@ -376,7 +479,8 @@ function showAchievementPopup(achievementName, duration = 2200) {
 
         const desc = document.createElement('p');
         desc.className = 'achievement-desc';
-        desc.innerText = 'three correct answers in a row!';
+        desc.id = 'achievement-popup-desc';
+        desc.innerText = '';
 
         card.appendChild(badge);
         card.appendChild(nameEl);
@@ -385,7 +489,10 @@ function showAchievementPopup(achievementName, duration = 2200) {
         document.body.appendChild(overlay);
     }
 
-    nameEl.innerText = achievementName;
+    nameEl.innerText = achievement.name;
+    if (descEl) {
+        descEl.innerText = achievement.description;
+    }
     overlay.classList.remove('hidden');
     playAchievementSound();
 
@@ -395,6 +502,15 @@ function showAchievementPopup(achievementName, duration = 2200) {
             resolve();
         }, duration);
     });
+}
+
+async function unlockAchievement(achievementId) {
+    const achievement = ACHIEVEMENTS[achievementId];
+    if (!achievement) return;
+    if (gameState.unlockedAchievements[achievementId]) return;
+
+    gameState.unlockedAchievements[achievementId] = true;
+    await showAchievementPopup(achievement);
 }
 function renderMap() {
     const mapContainer = document.getElementById('screen-map');
@@ -444,6 +560,7 @@ function renderMap() {
     earthEl.style.top = "50%";
     earthEl.onclick = (e) => {
         e.stopPropagation();
+        console.log('[Earth Button Click] Calling updateEarthStatus()');
         if (typeof updateEarthStatus === "function") updateEarthStatus();
         showScreen('screen-earth-status');
     };
@@ -455,66 +572,34 @@ async function completePlanet() {
     planet.isCompleted = true; // 1. 标记完成
 
     gameState.completedPlanets++;
+    console.log(`[completePlanet] Planet "${planet.name}" completed. Total completed: ${gameState.completedPlanets}/${gameState.totalPlanet}`);
+    
     await showGameAlert(`✨ Success! ${planet.name} energy has been collected.`);
+
+    if (gameState.completedPlanets === 1) {
+        await unlockAchievement('firstPlanet');
+    }
+    if (gameState.completedPlanets >= 3) {
+        await unlockAchievement('triExplorer');
+    }
+    if (planet.id === 1) {
+        await unlockAchievement('williamFollower');
+    }
 
     renderMap(); // 2. 🌟 重新渲染地图，这会触发上面 renderMap 里的 if(planet.isCompleted) 判断
     showScreen('screen-map'); // 3. 返回地图
     if (gameState.completedPlanets >= galaxyData.length) {
-        if (gameState.wrongAnswers === 0 && !gameState.perfectRunAchievementUnlocked) {
-            gameState.perfectRunAchievementUnlocked = true;
-            await showAchievementPopup(PERFECT_RUN_ACHIEVEMENT_NAME);
+        await unlockAchievement('allPlanets');
+        if (gameState.wrongAnswers === 0) {
+            await unlockAchievement('perfectRun');
         }
-        showScreen('screen-win'); // 切换到结局屏
-        playEndingCutscene();        // 播放结局动画
+        showEnding('good');
     } else {
         await showGameAlert(`${planet.name} energy has been collected!`);
         showScreen('screen-map');
     }
 }
-function playEndingCutscene() {
-    const endingScreen = document.getElementById('screen-ending');
-    if (!endingScreen) return;
 
-    // 清空内容，准备播放动画
-    endingScreen.innerHTML = '<div class="ending-content"></div>';
-    const container = endingScreen.querySelector('.ending-content');
-
-    const lines = [
-        "In 2026, the last energy core has been placed.",
-        "Dust in the atmosphere begins to settle...",
-        "The long-awaited sunlight pierces through the clouds, shining upon the desolate seabed.",
-        "Commander, look.",
-        "That hint of green is the signal of life rebirthing.",
-        "Thank you, the lone navigator.",
-        "Earth, has been reborn."
-    ];
-
-    let lineIndex = 0;
-
-    function showNextLine() {
-        if (lineIndex < lines.length) {
-            const p = document.createElement('p');
-            p.className = 'ending-line';
-            p.innerText = lines[lineIndex];
-            container.appendChild(p);
-            
-            // 自动滚动到底部
-            endingScreen.scrollTop = endingScreen.scrollHeight;
-
-            lineIndex++;
-            setTimeout(showNextLine, 2000); // 每2秒出一行
-        } else {
-            // 全部播完后，显示“回到标题”或者“重新开始”按钮
-            const btn = document.createElement('button');
-            btn.className = 'restart-btn';
-            btn.innerText = "✨ Start New Chapter";
-            btn.onclick = () => location.reload(); // 刷新网页重置游戏
-            container.appendChild(btn);
-        }
-    }
-
-    showNextLine();
-}
 async function checkAnswer(selectedIndex) {
     const planet = galaxyData[gameState.currentPlanetIndex];
     const activeQuestions = gameState.currentPlanetQuestions.length > 0
@@ -527,9 +612,8 @@ async function checkAnswer(selectedIndex) {
         // --- 情况 A: 答对了 ---
         gameState.correctStreak++;
 
-        if (gameState.correctStreak >= 3 && !gameState.streakAchievementUnlocked) {
-            gameState.streakAchievementUnlocked = true;
-            await showAchievementPopup(STREAK_ACHIEVEMENT_NAME);
+        if (gameState.correctStreak >= 3) {
+            await unlockAchievement('streak3');
         }
 
         await showGameAlert("🎉 Correct! Energy is being collected...");
@@ -561,8 +645,7 @@ async function checkAnswer(selectedIndex) {
         // 3. 检查是否死亡
         if (gameState.shield <= 0) {
             console.log("Shield depleted, transitioning to failure screen");
-            // 跳转到失败界面
-            showScreen('screen-lose'); 
+            showEnding('bad');
         } else {
             // 如果还没死，弹个窗提醒一下
             await showGameAlert("Warning: Energy parsing error! Shield damaged.");
@@ -610,34 +693,44 @@ function startGame() {
 
 function updateEarthStatus() {
     // 1. 获取当前修复进度
-    // 这里的进度逻辑要和你游戏里的变量名一致，比如 gameState.completedPlanets
     let completed = 0;
+    let totalPlanets = 5;
+    
     if (typeof gameState !== 'undefined') {
         completed = gameState.completedPlanets;
+        totalPlanets = gameState.totalPlanet || galaxyData.length || 5;
     }
     
-    // 假设你有 5 个星球
-    let progress = Math.floor((completed / 5) * 100); 
+    // 计算进度百分比
+    let progress = Math.floor((completed / totalPlanets) * 100);
+    console.log(`[updateEarthStatus] Completed: ${completed}, Total: ${totalPlanets}, Progress: ${progress}%`);
     
     // 2. 找到页面上的元素并更新
     const earthVal = document.getElementById('earth-progress-val');
     const earthDesc = document.getElementById('earth-description');
     const earthImg = document.getElementById('earth-large-img');
 
-    if (earthVal) earthVal.innerText = progress + "%";
+    console.log(`[updateEarthStatus] Found elements - Val: ${!!earthVal}, Desc: ${!!earthDesc}, Img: ${!!earthImg}`);
+
+    if (earthVal) {
+        earthVal.innerText = progress + "%";
+    }
 
     // 3. 根据进度改变描述和贴图
     if (earthDesc && earthImg) {
         if (progress === 0) {
             earthDesc.innerText = "Earth is on the brink of collapse, but hope is not lost. Let's start the journey to save our home!";
-            earthImg.src = "assets/earth-level1.png"; 
+            earthImg.src = "assets/earth-level1.png";
         } else if (progress < 100) {
             earthDesc.innerText = "Energy is gathering, and the ecosystem is showing signs of recovery!";
-            earthImg.src = "assets/earth-level2.png"; 
+            earthImg.src = "assets/earth-level2.png";
         } else {
             earthDesc.innerText = "Miraculously, Earth has been fully repaired! The sun shines again, and life flourishes. Thank you, brave navigator!";
-            earthImg.src = "assets/earth-level3.png"; 
+            earthImg.src = "assets/earth-level3.png";
         }
+        console.log(`[updateEarthStatus] Setting earth image to level (progress=${progress}%)`);
+    } else {
+        console.warn(`[updateEarthStatus] Missing elements: earthDesc=${!!earthDesc}, earthImg=${!!earthImg}`);
     }
 }
 // 这个函数负责：点击星球 -> 切换到答题页面
