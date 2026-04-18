@@ -660,22 +660,91 @@ body {
 .n5 { top: -10%; left: 85%;  animation: beautifulMeteor 16s linear infinite 11s; }
 .n6 { top: 25%;  left: 120%; animation: beautifulMeteor 17s linear infinite 6s; }
 
-#audio-control {
+#hud-controls {
     position: fixed;
     bottom: 20px;
     right: 20px;
+    display: flex;
+    gap: 10px;
+    z-index: 1000;
+}
+
+#audio-control,
+#achievement-control {
     background: rgba(102, 252, 243, 0.2);
     border: 2px solid #66fcf1;
     color: #66fcf1;
     padding: 10px;
     cursor: pointer;
-    z-index: 1000;
     font-size: 20px;
     border-radius: 5px;
+    min-width: 48px;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#audio-control:hover {
+#audio-control:hover,
+#achievement-control:hover {
     background: rgba(102, 252, 243, 0.4);
+}
+
+#screen-achievements {
+    width: min(1080px, 92vw);
+    margin: 0 auto;
+    height: 90vh;
+    overflow: auto;
+    padding: 20px;
+}
+
+.achievements-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 16px;
+    margin: 20px auto;
+}
+
+.achievement-column {
+    background: rgba(11, 12, 16, 0.86);
+    border: 2px solid #45a29e;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: left;
+}
+
+.achievement-column h3 {
+    margin: 0 0 10px;
+    color: #66fcf1;
+}
+
+.achievement-list {
+    display: grid;
+    gap: 10px;
+}
+
+.achievement-item {
+    border: 1px solid #45a29e;
+    border-radius: 8px;
+    padding: 10px;
+    background: rgba(17, 25, 30, 0.85);
+}
+
+.achievement-item.locked {
+    opacity: 0.55;
+    filter: grayscale(0.3);
+}
+
+.achievement-item-name {
+    margin: 0 0 6px;
+    color: #fff4b1;
+    font-weight: 700;
+}
+
+.achievement-item-desc {
+    margin: 0;
+    color: #66fcf1;
+    font-size: 14px;
 }
 
 /* 地球状态页面的贴图容器 - 与地图尺寸保持一致 */
@@ -701,4 +770,52 @@ body {
     height: 100%;
     object-fit: contain;
     image-rendering: pixelated;
+}
+
+#screen-ending {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 24px;
+    z-index: 2600;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.ending-layout {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.ending-panel {
+    width: min(520px, 92vw);
+    max-height: 86vh;
+    overflow: auto;
+    padding: 22px;
+    background: rgba(9, 14, 22, 0.68);
+    border: 2px solid rgba(102, 252, 241, 0.9);
+    border-radius: 12px;
+    text-align: left;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(2px);
+}
+
+#ending-title {
+    margin: 0 0 14px;
+    color: #fff4b1;
+    font-size: clamp(28px, 3vw, 42px);
+    line-height: 1.2;
+}
+
+#ending-text p {
+    margin: 0 0 12px;
+    color: #dffefb;
+    font-size: clamp(16px, 1.5vw, 22px);
+    line-height: 1.6;
 }

@@ -72,27 +72,31 @@
       </div>
     </section>
 
-
-
-    <section id="screen-win" class="screen hidden">
-      <h2>✨ 任务完成 ✨</h2>
-      <div class="dialogue-box">
-        <p>“能量满载！正在将外星智慧注入地球核心...”</p>
-        <p>（地球重新焕发了蓝色生机！）</p>
-        <p>“感谢你，舰长。你不仅拯救了地球，还成为了最伟大的天文航行者！”</p>
+    <section id="screen-achievements" class="screen hidden">
+      <h2>🏆 Achievement Collection</h2>
+      <div class="achievements-panel">
+        <div class="achievement-column">
+          <h3>Unlocked</h3>
+          <div id="achievements-unlocked" class="achievement-list"></div>
+        </div>
+        <div class="achievement-column">
+          <h3>Locked</h3>
+          <div id="achievements-locked" class="achievement-list"></div>
+        </div>
       </div>
-      <button onclick="location.reload()">再玩一次</button>
+      <button class="menu-btn" onclick="showScreen('screen-map')">⬅ Back to Map</button>
     </section>
 
-    <section id="screen-lose" class="screen hidden">
-      <h2 style="color: red;">💥 护盾耗尽 💥</h2>
-      <div class="dialogue-box">
-        <p>“警报！飞船外壳破裂，失去动力...”</p>
-        <p>“通讯中断... 地球的最后希望破灭了...”</p>
+
+
+    <section id="screen-ending" class="screen hidden">
+      <div class="ending-layout">
+        <div class="ending-panel">
+          <h2 id="ending-title">Ending</h2>
+          <div id="ending-text"></div>
+          <button class="menu-btn" onclick="location.reload()">Start New Run</button>
+        </div>
       </div>
-      <button onclick="location.reload()">重新尝试</button>
-    </section>
-    <section id="screen-lose" class="screen hidden">
     </section>
 
     <div id="modal-progress" class="modal hidden">
@@ -113,8 +117,13 @@
   <script src="main.js"></script>
   
 
-<div id="audio-control" onclick="toggleMusic()">
+<div id="hud-controls">
+  <div id="achievement-control" onclick="openAchievementScreen()" title="Achievements">
+    <span>🏆</span>
+  </div>
+  <div id="audio-control" onclick="toggleMusic()" title="Music">
     <span id="music-icon">🔇</span>
+  </div>
 </div>
 </body>
 
