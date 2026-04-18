@@ -498,14 +498,30 @@ const bgm = document.getElementById('game-bgm');
 const musicIcon = document.getElementById('music-icon');
 
 function toggleMusic() {
-    if (isMusicPlaying) {
-        bgm.pause();
-        musicIcon.innerText = "🔇";
-    } else {
-        bgm.play();
-        musicIcon.innerText = "🔊";
+    const bgm = document.getElementById('game-bgm');
+    const musicIcon = document.getElementById('music-icon');
+
+    if (!bgm) {
+        console.error("找不到音频元素！");
+        return;
     }
-    isMusicPlaying = !isMusicPlaying;
+
+    // 🌟 关键点：直接使用 bgm.paused 属性
+    // 如果音乐是暂停状态，就播放它
+    if (bgm.paused) {
+        bgm.play()
+            .then(() => {
+                musicIcon.innerText = "🔊"; // 切换图标
+            })
+            .catch(err => {
+                console.warn("播放请求被浏览器拦截:", err);
+            });
+    } 
+    // 如果音乐正在播放，就暂停它
+    else {
+        bgm.pause();
+        musicIcon.innerText = "🔇"; // 切换回静音图标
+    }
 }
 // 在你的开始按钮点击事件里加上这一行
 document.getElementById('start-btn').addEventListener('click', () => {
