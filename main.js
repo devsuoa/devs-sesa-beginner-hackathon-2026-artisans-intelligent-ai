@@ -157,6 +157,19 @@ function renderMap() {
     };
     mapContainer.appendChild(planetDiv);
   });
+ const earthEl = document.createElement('div');
+    earthEl.className = 'planet-icon earth-icon';
+    earthEl.innerHTML = `<img src="assets/earth.png">`;
+
+    // 🌟 重点检查这里：确保赋值给了正确的变量
+    earthEl.onclick = (e) => {
+        e.stopPropagation(); // 防止点击事件冒泡到地图背景上
+        console.log("地球被点击了！"); // 检查 F12 控制台有没有打印这行
+        updateEarthStatus();
+        showScreen('screen-earth-status');
+    };
+
+    mapContainer.appendChild(earthEl);
 }
 
 // 开始答题
@@ -274,5 +287,40 @@ function finishPlanet() {
     
     // ⛔⛔⛔ 绝对不能有 showScreen(''); 这一行！如果有，一定要删掉！⛔⛔⛔
   }
-  
+  // main.js 渲染地图的部分逻辑参考
+
+// --- 补上这个函数 ---
+
+}
+function updateEarthStatus() {
+    // 1. 获取当前修复进度
+    // 这里的进度逻辑要和你游戏里的变量名一致，比如 gameState.completedPlanets
+    let completed = 0;
+    if (typeof gameState !== 'undefined') {
+        completed = gameState.completedPlanets;
+    }
+    
+    // 假设你有 5 个星球
+    let progress = Math.floor((completed / 5) * 100); 
+    
+    // 2. 找到页面上的元素并更新
+    const earthVal = document.getElementById('earth-progress-val');
+    const earthDesc = document.getElementById('earth-description');
+    const earthImg = document.getElementById('earth-large-img');
+
+    if (earthVal) earthVal.innerText = progress + "%";
+
+    // 3. 根据进度改变描述和贴图
+    if (earthDesc && earthImg) {
+        if (progress === 0) {
+            earthDesc.innerText = "“地球目前一片死寂，只有微弱的求救信号...”";
+            earthImg.src = "assets/earth-level1.png"; 
+        } else if (progress < 100) {
+            earthDesc.innerText = "“能量正在汇聚，生态系统显示出复苏的迹象！”";
+            earthImg.src = "assets/earth-level2.png"; 
+        } else {
+            earthDesc.innerText = "“奇迹发生了！地球重新焕发了蓝色生机！”";
+            earthImg.src = "assets/earth-level3.png"; 
+        }
+    }
 }
