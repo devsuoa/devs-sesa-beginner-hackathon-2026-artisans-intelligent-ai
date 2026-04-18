@@ -258,6 +258,20 @@ body {
     object-fit: contain; /* 保持比例缩放 */
     image-rendering: pixelated; /* 保持像素风清晰度 */
 }
+/* 增加标签显示这是地球 */
+.earth-icon .label {
+    position: absolute;
+    bottom: -30px; /* 标签在图标下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #66fcf1;
+    color: #0b0c10;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap; /* 防止标签换行 */
+    text-shadow: 2px 2px 4px #000; /* 增加文字阴影，提升可读性 */
+}
 
 /* 鼠标悬停动画：让玩家知道这是大本营 */
 .earth-icon:hover {
@@ -407,4 +421,95 @@ body {
     padding: 0 20px;
     text-align: center;
     margin-bottom: 20px;
+}
+/* --- 唯美流星雨特效 --- */
+
+.space-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* 星星保持原地微弱呼吸 */
+.star-field {
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow: 
+        10vw 15vh #fff, 25vw 35vh #fff, 40vw 10vh #fff, 60vw 25vh #fff, 
+        85vw 10vh #fff, 15vw 55vh #fff, 35vw 75vh #fff, 55vw 60vh #fff,
+        75vw 85vh #fff, 95vw 55vh #fff, 5vw 90vh #fff, 20vw 85vh #fff,
+        45vw 45vh #66fcf1, 80vw 40vh #66fcf1, 70vw 15vh #fff, 12vw 12vh #fff;
+    animation: starBreath 6s ease-in-out infinite;
+}
+
+@keyframes starBreath {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.6; }
+}
+
+/* 🌟 流星：加长拖尾，优化发光 */
+.shooting-star {
+    position: absolute;
+    width: 200px; /* 拉长拖尾 */
+    height: 1.5px; /* 更细一点显得更优雅 */
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), transparent);
+    box-shadow: 0 0 15px rgba(102, 252, 243, 0.2);
+    opacity: 0;
+    transform: rotate(-35deg); /* 角度调平一点点，划过的路程视觉上更长 */
+    pointer-events: none;
+}
+
+/* 🌟 核心唯美动画：大幅增加时长，增加排队等待时间 */
+@keyframes beautifulMeteor {
+    0% {
+        transform: rotate(-35deg) translateX(0);
+        opacity: 0;
+    }
+    1% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1; /* 慢慢亮起 */
+    }
+    35% {
+        /* 15s 的 35% 约为 5s，5秒划完全屏，速度非常柔和 */
+        transform: rotate(-35deg) translateX(-120vw);
+        opacity: 0;
+    }
+    100% {
+        transform: rotate(-35deg) translateX(-120vw);
+        opacity: 0;
+    }
+}
+
+/* 为 6 颗流星设置不同的节奏，时长都在 12s-20s 之间 */
+.n1 { top: 0%;   left: 100%; animation: beautifulMeteor 15s linear infinite; }
+.n2 { top: 15%;  left: 95%;  animation: beautifulMeteor 18s linear infinite 4s; }
+.n3 { top: 30%;  left: 110%; animation: beautifulMeteor 14s linear infinite 8s; }
+.n4 { top: 5%;   left: 70%;  animation: beautifulMeteor 20s linear infinite 2s; }
+.n5 { top: -10%; left: 85%;  animation: beautifulMeteor 16s linear infinite 11s; }
+.n6 { top: 25%;  left: 120%; animation: beautifulMeteor 17s linear infinite 6s; }
+
+#audio-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(102, 252, 243, 0.2);
+    border: 2px solid #66fcf1;
+    color: #66fcf1;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+#audio-control:hover {
+    background: rgba(102, 252, 243, 0.4);
 }

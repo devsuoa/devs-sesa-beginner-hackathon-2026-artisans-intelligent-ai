@@ -10,6 +10,8 @@
 </head>
 
 <body>
+
+ 
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
   <div id="game-container">
@@ -28,6 +30,15 @@
     <section id="screen-map" class="screen hidden">
       <h2>星系地图：选择你要前往的星球</h2>
     </section>
+    <div class="space-effects">
+    <div class="star-field"></div>
+    <div class="shooting-star n1"></div>
+    <div class="shooting-star n2"></div>
+    <div class="shooting-star n3"></div>
+    <div class="shooting-star n4"></div>
+    <div class="shooting-star n5"></div>
+    <div class="shooting-star n6"></div>
+</div>
 
     <section id="screen-quiz" class="screen hidden">
       <div class="quiz-header">
@@ -58,6 +69,8 @@
         <button class="menu-btn" onclick="showScreen('screen-map')">🛰️ 返回星际地图</button>
       </div>
     </section>
+
+
 
     <section id="screen-win" class="screen hidden">
       <h2>✨ 任务完成 ✨</h2>
@@ -90,9 +103,17 @@
   </div>
 
   </div>
-
+<audio id="game-bgm" loop>
+    <source src="assets/bgm.mp3" type="audio/mpeg">
+    您的浏览器不支持音频播放。
+</audio>
   <script src="data.js"></script>
   <script src="main.js"></script>
+  
+
+<div id="audio-control" onclick="toggleMusic()">
+    <span id="music-icon">🔇</span>
+</div>
 </body>
 
 </html>

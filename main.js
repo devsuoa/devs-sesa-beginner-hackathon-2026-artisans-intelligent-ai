@@ -178,6 +178,9 @@ function renderMap() {
     const earthEl = document.createElement('div');
     earthEl.className = 'planet-icon earth-icon';
     earthEl.innerHTML = `<img src="assets/earth.png" alt="地球">`;
+    earthEl.innerHTML += `<span class="planet-label">地球</span>`;
+    earthEl.style.left = "50%";
+    earthEl.style.top = "50%";
     earthEl.onclick = (e) => {
         e.stopPropagation();
         if (typeof updateEarthStatus === "function") updateEarthStatus();
@@ -490,3 +493,24 @@ function showQuestion() {
         });
     }
 }
+let isMusicPlaying = false;
+const bgm = document.getElementById('game-bgm');
+const musicIcon = document.getElementById('music-icon');
+
+function toggleMusic() {
+    if (isMusicPlaying) {
+        bgm.pause();
+        musicIcon.innerText = "🔇";
+    } else {
+        bgm.play();
+        musicIcon.innerText = "🔊";
+    }
+    isMusicPlaying = !isMusicPlaying;
+}
+// 在你的开始按钮点击事件里加上这一行
+document.getElementById('start-btn').addEventListener('click', () => {
+    bgm.play(); // 只要用户点过屏幕，音乐就能播了
+    isMusicPlaying = true;
+    musicIcon.innerText = "🔊";
+    showScreen('screen-map');
+});
