@@ -126,6 +126,7 @@ window.onload = function() {
 let gameState = {
     currentPlanetIndex:0,
     currentQuestionIndex:0,
+    currentPlanetQuestions: [],
     totalPlanet:galaxyData.length,
     completedPlanets:0,
     shield: 3 // 新增：初始 3 点护盾
@@ -289,7 +290,10 @@ function playEndingCutscene() {
 }
 function checkAnswer(selectedIndex) {
     const planet = galaxyData[gameState.currentPlanetIndex];
-    const currentQ = planet.questions[gameState.currentQuestionIndex];
+    const activeQuestions = gameState.currentPlanetQuestions.length > 0
+        ? gameState.currentPlanetQuestions
+        : planet.questions;
+    const currentQ = activeQuestions[gameState.currentQuestionIndex];
 
     // 🌟 核心逻辑：将玩家点击的索引 (selectedIndex) 与数据里的正确索引 (currentQ.answer) 进行对比
     if (selectedIndex === currentQ.answer) {
@@ -300,7 +304,7 @@ function checkAnswer(selectedIndex) {
         gameState.currentQuestionIndex++;
 
         // 检查是否该星球所有题都答完了
-        if (gameState.currentQuestionIndex >= planet.questions.length) {
+        if (gameState.currentQuestionIndex >= activeQuestions.length) {
             completePlanet(); // 调用通关函数
         } else {
             showQuestion(); // 显示下一题
@@ -454,6 +458,9 @@ function startPlanet(index) {
 
     // 3. 重置题目进度
     gameState.currentQuestionIndex = 0;
+    gameState.currentPlanetQuestions = [...planet.questions]
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 2);
     
     // 4. 显示第一道题
     if (typeof showQuestion === "function") {
@@ -465,7 +472,10 @@ function startPlanet(index) {
 }
 function showQuestion() {
     const planet = galaxyData[gameState.currentPlanetIndex];
-    const currentQ = planet.questions[gameState.currentQuestionIndex];
+    const activeQuestions = gameState.currentPlanetQuestions.length > 0
+        ? gameState.currentPlanetQuestions
+        : planet.questions;
+    const currentQ = activeQuestions[gameState.currentQuestionIndex];
 
     // 1. 获取元素
     const questionTextEl = document.getElementById('question-text');
