@@ -1,13 +1,74 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>devs-sesa-beginner-hackathon-2026</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>devs-sesa-beginner-hackathon-2026</title>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.tsx"></script>
+  <div id="game-container">
+    <div id="status-bar" class="hidden">
+      <p>飞船护盾: <span id="shield-display">❤️❤️❤️</span></p>
+    </div>
+    
+    <section id="screen-prologue" class="screen">
+      <h2>📡 远程通讯频道</h2>
+
+      <div id="dialogue-history"></div>
+
+      <button id="start-btn" class="hidden" style="margin-top: 20px;" onclick="startGame()">🚀 启动飞船引擎</button>
+    </section>
+
+    <section id="screen-map" class="screen hidden">
+      <h2>星系地图：选择你要前往的星球</h2>
+      <div id="ship" class="pixel-ship">🚀</div>
+    </section>
+
+    <section id="screen-quiz" class="screen hidden">
+      <h2 id="question-text">问题内容</h2>
+      <div id="options-container"></div>
+    </section>
+
+    <section id="screen-win" class="screen hidden">
+      <h2>✨ 任务完成 ✨</h2>
+      <div class="dialogue-box">
+        <p>“能量满载！正在将外星智慧注入地球核心...”</p>
+        <p>（地球重新焕发了蓝色生机！）</p>
+        <p>“感谢你，舰长。你不仅拯救了地球，还成为了最伟大的天文航行者！”</p>
+      </div>
+      <button onclick="location.reload()">再玩一次</button>
+    </section>
+
+    <section id="screen-lose" class="screen hidden">
+      <h2 style="color: red;">💥 护盾耗尽 💥</h2>
+      <div class="dialogue-box">
+        <p>“警报！飞船外壳破裂，失去动力...”</p>
+        <p>“通讯中断... 地球的最后希望破灭了...”</p>
+      </div>
+      <button onclick="location.reload()">重新尝试</button>
+    </section>
+    <section id="screen-lose" class="screen hidden">
+    </section>
+
+    <div id="modal-progress" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="modal-title">星球攻略完毕！</h3>
+        <p>地球修复进度：<span id="progress-text">0%</span></p>
+        <button onclick="returnToMap()">返回星际图</button>
+      </div>
+    </div>
+  </div>
+
+  </div>
+
+  <script src="data.js"></script>
+  <script src="main.js"></script>
+</body>
+
 </html>
