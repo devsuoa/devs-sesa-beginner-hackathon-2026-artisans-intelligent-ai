@@ -21,7 +21,7 @@ const prologueScript = [
         // 标记：这是主角（你）！
         role: "player", 
         name: "主角 (你)", 
-        avatar: "assets/player.png", // 指向你设计的主角贴图
+        avatar: "assets/main.png", // 指向你设计的主角贴图
         text: "“收到，这里是星际巡航号。地球目前的情况严重吗？”" 
     },
     { 
@@ -33,7 +33,7 @@ const prologueScript = [
     { 
         role: "player", 
         name: "主角 (你)", 
-        avatar: "assets/player.png", 
+        avatar: "assets/main.png", 
         text: "“明白。引擎全开，目标：未知星系。出发！”" 
     }
 ];
