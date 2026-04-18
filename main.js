@@ -137,42 +137,43 @@ function showScreen(screenId){
 }
 function renderMap() {
     const mapContainer = document.getElementById('screen-map');
-    
-    // 1. 清空地图，保留背景标题和飞船（如果有飞船的话）
-    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship"></div>';
+   
+    if (!mapContainer) return;
 
-    // 2. 遍历 data.js 里的星球数据
-   galaxyData.forEach((planet, index) => {
-    // 🛡️ 增加防弹代码：如果 planet 或 planet.position 不存在，直接跳过这个星球
-    if (!planet || !planet.position) {
-        console.warn(`星球数据索引 ${index} 缺少坐标 position，已跳过渲染。`);
-        return; 
-    }
+    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship">🚀</div>';
 
-    const planetEl = document.createElement('div');
-    planetEl.className = 'planet-icon';
-    
-    // 使用变量存储坐标，确保万无一失
-    const x = planet.position.x;
-    const y = planet.position.y;
+    galaxyData.forEach((planet, index) => {
+        if (!planet || !planet.position) return;
 
-    planetEl.innerHTML = `
-        <img src="${planet.image || 'assets/default-planet.png'}" style="width:100%; height:100%;">
-        <span class="planet-label">${planet.name || '未知星球'}</span>
-    `;
+        const planetEl = document.createElement('div');
+        planetEl.className = 'planet-icon';
+        
+        // 🌟 核心改动：检查星球是否已完成
+        if (planet.isCompleted) {
+            planetEl.classList.add('locked'); // 加入锁定样式（红光）
+            // 如果已完成，不绑定 startPlanet，或者绑定一个“已锁定”的提示
+            planetEl.onclick = (e) => {
+                e.stopPropagation();
+                console.log("该星球能量已回收，坐标锁定中。");
+            };
+        } else {
+            // 未完成时，正常绑定点击事件
+            planetEl.onclick = (e) => {
+                e.stopPropagation();
+                startPlanet(index);
+            };
+        }
 
-    planetEl.style.left = x + "%";
-    planetEl.style.top = y + "%";
+        planetEl.innerHTML = `
+            <img src="${planet.image}" alt="${planet.name}">
+            <span class="planet-label">${planet.name}</span>
+        `;
 
-        // 点击进入对应的关卡
-        planetEl.onclick = (e) => {
-            e.stopPropagation();
-            startPlanet(index);
-        };
+        planetEl.style.left = planet.position.x + "%";
+        planetEl.style.top = planet.position.y + "%";
 
         mapContainer.appendChild(planetEl);
     });
-
     // 3. 渲染地球 (保持你之前的代码)
     const earthEl = document.createElement('div');
     earthEl.className = 'planet-icon earth-icon';
@@ -186,11 +187,23 @@ function renderMap() {
 }
 
 // 开始答题
-function startPlanetQuiz(planetIndex) {
-  gameState.currentPlanetIndex = planetIndex;
-  gameState.currentQuestionIndex = 0;
-  showScreen('screen-quiz');
-  loadQuestion();
+function startPlanet(index) {
+    gameState.currentPlanetIndex = index;
+    const planet = galaxyData[index];
+
+    document.getElementById('planet-name').innerText = planet.name;
+    
+    // 🌟 重点检查这一行！
+    // 你的数据里并没有 'description' 字段，如果你写了这一行，页面就会显示 undefined
+    // 如果你想显示描述，需要在 data.js 里给每个星球加上 description: "xxx"
+    const descEl = document.getElementById('planet-desc');
+    if (descEl) {
+        descEl.innerText = planet.description || "正在通过远程通讯频道扫描星球详细信息...";
+    }
+
+    gameState.currentQuestionIndex = 0;
+    showQuestion();
+    showScreen('screen-quiz');
 }
 
 function loadQuestion() {
@@ -210,37 +223,119 @@ function loadQuestion() {
     optionsContainer.appendChild(btn);
   });
 }
-
-function checkAnswer(selectedIndex, correctIndex) {
-  if (selectedIndex === correctIndex) {
-    // ... 答对的逻辑保持原样 ...
-    gameState.currentQuestionIndex++;
+function completePlanet() {
     const planet = galaxyData[gameState.currentPlanetIndex];
-    if (gameState.currentQuestionIndex < planet.questions.length) {
-      loadQuestion();
-    } else {
-      finishPlanet();
-    }
- // ...前面的代码
-  } else {
-    // 答错了的逻辑
-    gameState.shield--; 
-    
-    // 更新屏幕上的红心显示
-    let hearts = "";
-    for(let i = 0; i < gameState.shield; i++) hearts += "❤️";
-    document.getElementById('shield-display').innerText = hearts;
+    planet.isCompleted = true; // 1. 标记完成
 
-    // === 判断失败跳转 ===
-    if (gameState.shield <= 0) {
-      // 护盾归零，隐藏血条，跳转到失败结局
-      document.getElementById('status-bar').classList.add('hidden');
-      showScreen('screen-lose'); 
+    gameState.completedPlanets++;
+    alert(`✨ 成功！${planet.name} 的能量已回收。`);
+
+    renderMap(); // 2. 🌟 重新渲染地图，这会触发上面 renderMap 里的 if(planet.isCompleted) 判断
+    showScreen('screen-map'); // 3. 返回地图
+    if (gameState.completedPlanets >= galaxyData.length) {
+        showScreen('screen-win'); // 切换到结局屏
+        playEndingCutscene();        // 播放结局动画
     } else {
-      // 还没死，弹个提示继续答题
-      alert(`答案错误！护盾受损，还剩 ${gameState.shield} 次机会！`);
+        alert(`${planet.name} 的能量已收集完毕！`);
+        showScreen('screen-map');
     }
-  }
+}
+function playEndingCutscene() {
+    const endingScreen = document.getElementById('screen-ending');
+    if (!endingScreen) return;
+
+    // 清空内容，准备播放动画
+    endingScreen.innerHTML = '<div class="ending-content"></div>';
+    const container = endingScreen.querySelector('.ending-content');
+
+    const lines = [
+        "2026年，最后一颗能量核心归位。",
+        "大气层的尘埃开始散去...",
+        "久违的阳光重新穿透云层，洒向荒芜的海床。",
+        "指挥官，你看。",
+        "那一抹绿色，是生命重新萌芽的信号。",
+        "感谢你，孤独的领航者。",
+        "地球，复苏了。"
+    ];
+
+    let lineIndex = 0;
+
+    function showNextLine() {
+        if (lineIndex < lines.length) {
+            const p = document.createElement('p');
+            p.className = 'ending-line';
+            p.innerText = lines[lineIndex];
+            container.appendChild(p);
+            
+            // 自动滚动到底部
+            endingScreen.scrollTop = endingScreen.scrollHeight;
+
+            lineIndex++;
+            setTimeout(showNextLine, 2000); // 每2秒出一行
+        } else {
+            // 全部播完后，显示“回到标题”或者“重新开始”按钮
+            const btn = document.createElement('button');
+            btn.className = 'restart-btn';
+            btn.innerText = "✨ 开启新篇章";
+            btn.onclick = () => location.reload(); // 刷新网页重置游戏
+            container.appendChild(btn);
+        }
+    }
+
+    showNextLine();
+}
+function checkAnswer(selectedIndex) {
+    const planet = galaxyData[gameState.currentPlanetIndex];
+    const currentQ = planet.questions[gameState.currentQuestionIndex];
+
+    // 🌟 核心逻辑：将玩家点击的索引 (selectedIndex) 与数据里的正确索引 (currentQ.answer) 进行对比
+    if (selectedIndex === currentQ.answer) {
+        // --- 情况 A: 答对了 ---
+        alert("🎉 正确！能量正在回收...");
+        
+        // 增加题目索引，准备下一题
+        gameState.currentQuestionIndex++;
+
+        // 检查是否该星球所有题都答完了
+        if (gameState.currentQuestionIndex >= planet.questions.length) {
+            completePlanet(); // 调用通关函数
+        } else {
+            showQuestion(); // 显示下一题
+        }
+    } else {
+        // --- 情况 B: 答错了 ---
+        // --- 情况 B: 答错了 ---
+        console.log("回答错误，当前护盾值:", gameState.shield);
+        
+        // 1. 扣除生命值/护盾
+        gameState.shield--; 
+
+        // 2. 立即更新左上角的 UI 显示（确保心形图标减少）
+        if (typeof updateStatusBar === "function") {
+            updateStatusBar();
+        }
+
+        // 3. 检查是否死亡
+        if (gameState.shield <= 0) {
+            console.log("护盾归零，进入失败界面");
+            // 跳转到失败界面
+            showScreen('screen-lose'); 
+        } else {
+            // 如果还没死，弹个窗提醒一下
+            alert("警告：能量解析错误！护盾受损。");
+        }
+    }
+}
+function updateStatusBar() {
+    const shieldEl = document.getElementById('shield-display'); // 假设你的血条 ID 是这个
+    if (!shieldEl) return;
+
+    // 用循环根据剩余血量生成爱心
+    let hearts = "";
+    for (let i = 0; i < 3; i++) {
+        hearts += i < gameState.shield ? "❤️" : "🖤"; // 没血了变黑心或空心
+    }
+    shieldEl.innerText = ` ${hearts}`;
 }
 // ...后面的代码
 
@@ -346,12 +441,12 @@ function startPlanet(index) {
     const planet = galaxyData[index];
 
     // 2. 更新答题界面的文字和图片
-    const nameEl = document.getElementById('planet-name');
-    const descEl = document.getElementById('planet-desc');
-    const bigImgEl = document.getElementById('planet-big-img');
+    const nameEl = document.getElementById('planet-name').innerText = planet.name;
+    /*const descEl = document.getElementById('planet-desc');*/
+    const bigImgEl = document.getElementById('planet-big-img').src = planet.image;
 
     if (nameEl) nameEl.innerText = planet.name;
-    if (descEl) descEl.innerText = planet.description;
+    /*if (descEl) descEl.innerText = planet.description;*/
     if (bigImgEl) bigImgEl.src = planet.image;
 
     // 3. 重置题目进度
@@ -366,29 +461,26 @@ function startPlanet(index) {
     showScreen('screen-quiz');
 }
 function showQuestion() {
-    // 1. 获取当前星球数据
     const planet = galaxyData[gameState.currentPlanetIndex];
-    
-    // 🌟 核心检查：看看数据里有没有 questions 这个数组
-    if (!planet || !planet.questions || !planet.questions[gameState.currentQuestionIndex]) {
-        console.error("找不到题目数据！检查 data.js 是否有 questions 数组");
+    const currentQ = planet.questions[gameState.currentQuestionIndex];
+
+    // 1. 获取元素
+    const questionTextEl = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+
+    // 🛡️ 安全检查：如果页面上没有这个 ID，就在控制台报错，而不是让程序崩溃
+    if (!questionTextEl) {
+        console.error("错误：在 HTML 中找不到 ID 为 'question-text' 的元素！");
+        return; 
+    }
+    if (!optionsContainer) {
+        console.error("错误：在 HTML 中找不到 ID 为 'options-container' 的元素！");
         return;
     }
 
-    // 2. 获取当前这一道题
-    const currentQ = planet.questions[gameState.currentQuestionIndex];
-
-    // 3. 渲染题目文字
-    const questionTextEl = document.getElementById('question-text');
-    if (questionTextEl) {
-        questionTextEl.innerText = currentQ.question; // 确保 data.js 里用的是 'question' 属性名
-    }
-
-    // 4. 渲染选项按钮
-    const optionsContainer = document.getElementById('options-container');
-    if (optionsContainer) {
-        optionsContainer.innerHTML = ''; // 先清空旧按钮
-
+    if (currentQ) {
+        questionTextEl.innerText = currentQ.question;
+        optionsContainer.innerHTML = '';
         currentQ.options.forEach((option, index) => {
             const btn = document.createElement('button');
             btn.className = 'option-btn';
