@@ -139,7 +139,7 @@ function renderMap() {
     const mapContainer = document.getElementById('screen-map');
     
     // 1. 清空地图，保留背景标题和飞船（如果有飞船的话）
-    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship">🚀</div>';
+    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship"></div>';
 
     // 2. 遍历 data.js 里的星球数据
    galaxyData.forEach((planet, index) => {
