@@ -1,0 +1,348 @@
+/* 基础页面设置 */
+body {
+    background-color: #0b0c10; /* 深空背景色 */
+    color: #66fcf1; /* 荧光文字色 */
+    font-family: sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+/* 核心逻辑类：用于隐藏元素 */
+.hidden {
+    display: none !important;
+}
+
+/* 简单的星球和飞船样式，方便你先看懂 */
+.pixel-planet {
+    width: 90px;
+    height: 90px;
+    background-color: #ff9800;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+}
+
+.pixel-planet.completed {
+    background-color: #4caf50; /* 攻略完变成绿色 */
+}
+
+#ship {
+    position: absolute;
+    font-size: 30px;
+    transition: all 1s ease; /* 飞船移动时的平滑动画 */
+}
+
+/* 给地图一个相对定位的框 */
+#screen-map {
+    position: relative;
+    width: 1200px;
+    height: 800px;
+    border: 2px solid #45a29e;
+    margin: 0 auto;
+}
+
+/* 状态栏的装修，让它固定在屏幕顶部 */
+#status-bar {
+    position: fixed; /* 固定在屏幕上 */
+    top: 27px;
+    left: 7%;
+    transform: translateX(-50%); /* 居中显示 */
+    background-color: rgba(0, 0, 0, 0.7); /* 半透明黑色背景 */
+    padding: 10px 20px;
+    border: 2px solid #45a29e; /* 像素风边框色 */
+    border-radius: 0px;
+    z-index: 1000; /* 确保它在最前面，不会被星球挡住 */
+    font-weight: bold;
+    color: #ff4b2b; /* 让护盾文字显眼一点（橙红色） */
+}
+
+#shield-display {
+    letter-spacing: 5px; /* 让红心之间有空隙 */
+}
+
+/* style.css 新增样式 */
+
+/* 对话区域容器：使用 flex 让头像和文字并排 */
+.dialogue-container {
+    display: flex;
+    align-items: flex-start; /* 顶部对齐 */
+    justify-content: center; /* 居中 */
+    gap: 20px; /* 头像和文字的间距 */
+    margin: 40px auto;
+    max-width: 800px; /* 限制最大宽度，防止文字太长 */
+    padding: 20px;
+}
+
+/* 头像框样式 */
+.avatar-box {
+    width: 100px; /* 根据你设计的贴图大小调整 */
+    height: 100px;
+    border: 4px solid #45a29e; /* 像素风边框 */
+    background-color: rgba(0, 0, 0, 0.5); /* 半透明背景 */
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* 防止图片溢出 */
+}
+
+#prologue-avatar {
+    max-width: 100%;
+    max-height: 100%;
+    /* 像素风贴图必备属性：防止图片变模糊 */
+    image-rendering: pixelated; 
+}
+
+/* 文字框样式 (覆盖之前的 .dialogue-box) */
+.prologue #screen-prologue .dialogue-box {
+    flex: 1; /* 占据剩余空间 */
+    text-align: left; /* 文字左对齐 */
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 4px solid #66fcf1;
+    padding: 20px;
+    min-height: 100px; /* 设置最小高度，防止打字时容器高度一直抖动 */
+    color: #66fcf1;
+    font-family: 'Courier New', Courier, monospace; /* 使用等宽字体，更有打字机感 */
+    font-size: 1.1em;
+    line-height: 1.6;
+}
+
+/* ========================================= */
+/* 定义小人抖动动画 (Keyframes) */
+/* ========================================= */
+@keyframes avatar-bounce {
+    0%, 100% { transform: translateY(0); } /* 初始和结束位置 */
+    50% { transform: translateY(-5px); }  /* 中间向上移动 5 像素 */
+}
+
+/* 新增一个 CSS 类：当 JS 给小人加上这个类时，它就会抖动 */
+.talking {
+    animation: avatar-bounce 0.2s ease-in-out infinite; /* 0.2秒循环一次，无限循环 */
+}
+.name-tag {
+    background-color: #66fcf1;
+    color: #0b0c10;
+    display: inline-block;
+    padding: 5px 15px;
+    font-weight: bold;
+    font-size: 0.9em;
+    border-radius: 5px 5px 0 0;
+    margin-left: 20px;
+    text-transform: uppercase;
+}
+
+.main-dialogue-area {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+/* 对话历史大盒子：限制高度，满了就出现滚动条 */
+#dialogue-history {
+    display: flex;
+    flex-direction: column; /* 竖着排列 */
+    gap: 15px; /* 每一句之间的间距 */
+    max-height: 60vh; /* 最高占屏幕的 60%，防止撑爆屏幕 */
+    overflow-y: auto; /* 内容多了自动可以往下滚 */
+    padding: 10px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* JS 生成的每一行对话的样式 */
+.dialogue-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+/* 包含名字和内容的文字框 */
+.dialogue-content-box {
+    flex: 1;
+    background-color: rgba(0, 0, 0, 0.7);
+    border: 2px solid #66fcf1;
+    border-radius: 8px;
+    padding: 10px 15px;
+    text-align: left;
+}
+
+/* 说话人的名字 */
+.dialogue-name {
+    color: #ff9800; /* 橙色名字，更醒目 */
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 0.9em;
+}
+
+/* 说话的内容 */
+.dialogue-text {
+    color: #66fcf1;
+    margin: 0;
+    line-height: 1.5;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* style.css 新增：社交软件风格对话框样式 */
+
+/* 1. 全局微调：让每一行占据全宽，方便对齐 */
+.dialogue-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    width: 100%; /* 占满历史大盒子的宽度 */
+}
+
+/* 2. 限定对话包的最大宽度，防止文字太长，看起来像“聊天泡泡” */
+.dialogue-content-box {
+    max-width: 70%; /* 限制宽度，不要占满屏幕 */
+}
+
+/* ========================================= */
+/* 主角专属样式 (当这一行带有 .row-player 类时) */
+/* ========================================= */
+
+.dialogue-row.row-player {
+    /* ✨ 核心魔法 1：让整行内容靠右侧对齐 */
+    justify-content: flex-end; 
+
+    /* ✨ 核心魔法 2：反转内容顺序！让头像和文字框位置对调 */
+    /* 默认是 [头像][文字]，反转后变成 [文字][头像] */
+    flex-direction: row-reverse; 
+}
+
+/* 3. 主角的名字和文字内部居右对齐 */
+.row-player .dialogue-name {
+    text-align: right; /* 名字靠右 */
+    color: #4caf50;    /* 换个醒目的绿色名字（社交软件常用色） */
+}
+
+.row-player .dialogue-text {
+    text-align: right; /* 台词内容靠右 */
+}
+
+/* 4. 微调：给主角的对话框换个皮肤（可选，让界面更有层次感） */
+.row-player .dialogue-content-box {
+    border-color: #4caf50; /* 绿色的边框 */
+    /* background-color: rgba(0, 50, 20, 0.7); /* 淡淡的深绿色背景 */
+}
+/* 地球在地图上的图标样式 */
+.earth-icon {
+    position: absolute;
+    /* 1. 设定大小：不要让它保持原始尺寸 */
+    width: 150px;  /* 根据你的地图大小调整，建议比普通星球大一点 */
+    height: 150px;
+    
+    /* 2. 精确居中：先定位到 50%，再向左向上回退自身的一半 */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    
+    /* 3. 层级：确保它在背景云层之上，但不要遮挡状态栏 */
+    z-index: 100;
+    
+    /* 4. 交互：让它看起来可以点击 */
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+/* 内部图片的适配 */
+.earth-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; /* 保持比例缩放 */
+    image-rendering: pixelated; /* 保持像素风清晰度 */
+}
+
+/* 鼠标悬停动画：让玩家知道这是大本营 */
+.earth-icon:hover {
+    transform: translate(-50%, -50%) scale(1.1); /* 保持居中的同时放大 */
+    filter: drop-shadow(0 0 15px #66fcf1);
+}
+
+#start-btn {
+    /* 1. 调整大小 */
+    padding: 20px 40px;      /* 内边距：上下20px，左右40px */
+    font-size: 24px;         /* 字体变大 */
+    
+    /* 2. 样式美化 */
+    background-color: #66fcf1; /* 背景色（青蓝色） */
+    color: #0b0c10;          /* 文字颜色（深色） */
+    border: 4px solid #45a29e; /* 像素感边框 */
+    cursor: pointer;         /* 鼠标悬停时变成手形 */
+    font-weight: bold;
+    
+    /* 3. 居中和动画 */
+    display: block;
+    margin: 30px auto;       /* 上下留白并水平居中 */
+    transition: transform 0.2s; /* 增加缩放动画 */
+}
+
+/* 鼠标悬停时的效果：稍微变大一点，更有交互感 */
+#start-btn:hover {
+    transform: scale(1.1);   /* 放大 1.1 倍 */
+    background-color: #45a29e;
+}
+
+#screen-map {
+    /* 你的地图贴图路径 */
+    background-image: url('assets/map.png'); 
+    
+    /* 核心代码：让图片自动缩放以填满整个容器，同时保持比例 */
+    background-size: cover; 
+    
+    /* 让地图居中显示 */
+    background-position: center;
+    
+    /* 防止地图重复出现 */
+    background-repeat: no-repeat;
+    
+    /* 确保容器有足够的大小 */
+    width: 75%;
+    height: 90vh; /* 占满整个屏幕高度 */
+    position: relative;
+}
+/* 修改或添加以下 CSS */
+.planet-icon {
+    position: absolute;
+    /* 1. 设定星球的大小，建议和之前圆圈的大小一致 */
+    width: 120px;  
+    height: 120px;
+    
+    /* 2. 确保它是从中心定位的 */
+    transform: translate(-50%, -50%); 
+    
+    cursor: pointer;
+    z-index: 20; /* 确保它在云朵之上 */
+}
+
+/* 重点：约束里面的图片，让它 100% 填充这个 90px 的框 */
+.planet-icon img {
+    width: 100%;
+    height: 100%;
+    
+    /* contain 保证图片不被拉伸变形，完整显示在框里 */
+    object-fit: contain; 
+    
+    /* 针对像素贴图，防止模糊 */
+    image-rendering: pixelated; 
+    
+    /* 增加一个悬停效果，让它更有动感 */
+    transition: transform 0.2s ease;
+}
+
+.planet-icon:hover img {
+    transform: scale(1.2); /* 鼠标移上去轻轻放大 */
+    filter: drop-shadow(0 0 8px #66fcf1); /* 增加光晕 */
+}
+
+/* 修改名字标签的位置，防止被大图盖住 */
+.planet-label {
+    position: absolute;
+    bottom: -25px; /* 移到星球下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    color: #66fcf1;
+    font-size: 14px;
+    white-space: nowrap;
+    text-shadow: 2px 2px 4px #000;
+}
