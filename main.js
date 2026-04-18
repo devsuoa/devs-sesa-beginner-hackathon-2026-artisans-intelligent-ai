@@ -136,39 +136,52 @@ function showScreen(screenId){
     document.getElementById(screenId).classList.remove('hidden');
 }
 function renderMap() {
-  const mapContainer = document.getElementById('screen-map');
-  const ship = document.getElementById('ship');
-
-  // 清理旧的星球（防止重复生成）
-  document.querySelectorAll('.pixel-planet').forEach(el => el.remove());
-
-  galaxyData.forEach((planet, index) => {
-    let planetDiv = document.createElement('div');
-    planetDiv.className = `pixel-planet ${planet.isCompleted ? 'completed' : ''}`;
-    planetDiv.style.left = `${planet.position.x}%`;
-    planetDiv.style.top = `${planet.position.y}%`;
+    const mapContainer = document.getElementById('screen-map');
     
-    planetDiv.onclick = () => {
-      if (!planet.isCompleted) {
-        ship.style.left = `${planet.position.x}%`;
-        ship.style.top = `${planet.position.y}%`;
-        setTimeout(() => startPlanetQuiz(index), 1000); // 飞船飞1秒后出题
-      }
-    };
-    mapContainer.appendChild(planetDiv);
-  });
- const earthEl = document.createElement('div');
-    earthEl.className = 'planet-icon earth-icon';
-    earthEl.innerHTML = `<img src="assets/earth.png">`;
+    // 1. 清空地图，保留背景标题和飞船（如果有飞船的话）
+    mapContainer.innerHTML = '<h2>星系地图</h2><div id="ship" class="pixel-ship">🚀</div>';
 
-    // 🌟 重点检查这里：确保赋值给了正确的变量
+    // 2. 遍历 data.js 里的星球数据
+   galaxyData.forEach((planet, index) => {
+    // 🛡️ 增加防弹代码：如果 planet 或 planet.position 不存在，直接跳过这个星球
+    if (!planet || !planet.position) {
+        console.warn(`星球数据索引 ${index} 缺少坐标 position，已跳过渲染。`);
+        return; 
+    }
+
+    const planetEl = document.createElement('div');
+    planetEl.className = 'planet-icon';
+    
+    // 使用变量存储坐标，确保万无一失
+    const x = planet.position.x;
+    const y = planet.position.y;
+
+    planetEl.innerHTML = `
+        <img src="${planet.image || 'assets/default-planet.png'}" style="width:100%; height:100%;">
+        <span class="planet-label">${planet.name || '未知星球'}</span>
+    `;
+
+    planetEl.style.left = x + "%";
+    planetEl.style.top = y + "%";
+
+        // 点击进入对应的关卡
+        planetEl.onclick = (e) => {
+            e.stopPropagation();
+            startPlanet(index);
+        };
+
+        mapContainer.appendChild(planetEl);
+    });
+
+    // 3. 渲染地球 (保持你之前的代码)
+    const earthEl = document.createElement('div');
+    earthEl.className = 'planet-icon earth-icon';
+    earthEl.innerHTML = `<img src="assets/earth.png" alt="地球">`;
     earthEl.onclick = (e) => {
-        e.stopPropagation(); // 防止点击事件冒泡到地图背景上
-        console.log("地球被点击了！"); // 检查 F12 控制台有没有打印这行
-        updateEarthStatus();
+        e.stopPropagation();
+        if (typeof updateEarthStatus === "function") updateEarthStatus();
         showScreen('screen-earth-status');
     };
-
     mapContainer.appendChild(earthEl);
 }
 
@@ -322,5 +335,66 @@ function updateEarthStatus() {
             earthDesc.innerText = "“奇迹发生了！地球重新焕发了蓝色生机！”";
             earthImg.src = "assets/earth-level3.png"; 
         }
+    }
+}
+// 这个函数负责：点击星球 -> 切换到答题页面
+function startPlanet(index) {
+    console.log("正在启动星球关卡，索引：", index);
+    
+    // 1. 设置当前正在挑战的星球数据
+    gameState.currentPlanetIndex = index;
+    const planet = galaxyData[index];
+
+    // 2. 更新答题界面的文字和图片
+    const nameEl = document.getElementById('planet-name');
+    const descEl = document.getElementById('planet-desc');
+    const bigImgEl = document.getElementById('planet-big-img');
+
+    if (nameEl) nameEl.innerText = planet.name;
+    if (descEl) descEl.innerText = planet.description;
+    if (bigImgEl) bigImgEl.src = planet.image;
+
+    // 3. 重置题目进度
+    gameState.currentQuestionIndex = 0;
+    
+    // 4. 显示第一道题
+    if (typeof showQuestion === "function") {
+        showQuestion();
+    }
+    
+    // 5. 切换屏幕
+    showScreen('screen-quiz');
+}
+function showQuestion() {
+    // 1. 获取当前星球数据
+    const planet = galaxyData[gameState.currentPlanetIndex];
+    
+    // 🌟 核心检查：看看数据里有没有 questions 这个数组
+    if (!planet || !planet.questions || !planet.questions[gameState.currentQuestionIndex]) {
+        console.error("找不到题目数据！检查 data.js 是否有 questions 数组");
+        return;
+    }
+
+    // 2. 获取当前这一道题
+    const currentQ = planet.questions[gameState.currentQuestionIndex];
+
+    // 3. 渲染题目文字
+    const questionTextEl = document.getElementById('question-text');
+    if (questionTextEl) {
+        questionTextEl.innerText = currentQ.question; // 确保 data.js 里用的是 'question' 属性名
+    }
+
+    // 4. 渲染选项按钮
+    const optionsContainer = document.getElementById('options-container');
+    if (optionsContainer) {
+        optionsContainer.innerHTML = ''; // 先清空旧按钮
+
+        currentQ.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerText = option;
+            btn.onclick = () => checkAnswer(index);
+            optionsContainer.appendChild(btn);
+        });
     }
 }

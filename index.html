@@ -16,7 +16,7 @@
     <div id="status-bar" class="hidden">
       <p>飞船护盾: <span id="shield-display">❤️❤️❤️</span></p>
     </div>
-    
+
     <section id="screen-prologue" class="screen">
       <h2>📡 远程通讯频道</h2>
 
@@ -31,25 +31,26 @@
     </section>
 
     <section id="screen-quiz" class="screen hidden">
-      <h2 id="question-text">问题内容</h2>
-      <div id="options-container"></div>
+      <h2 id="planet-name">星球名字</h2>
+      <img id="planet-big-img" src="" alt="星球展示" style="width: 200px; height: 200px; image-rendering: pixelated;">
+      <p id="planet-desc">描述文字...</p>
     </section>
     <section id="screen-earth-status" class="screen hidden">
-    <h2>🌍 地球当前状态</h2>
-    
-    <div class="earth-status-container">
+      <h2>🌍 地球当前状态</h2>
+
+      <div class="earth-status-container">
         <div class="earth-visual">
-            <img src="assets/earth-level1.png" id="earth-large-img" alt="地球状态">
+          <img src="assets/earth-level1.png" id="earth-large-img" alt="地球状态">
         </div>
-        
+
         <div class="dialogue-box">
-            <p id="earth-description">地球目前处于能量极度匮乏状态，生态系统静止...</p>
-            <p>当前修复总进度：<span id="earth-progress-val">0%</span></p>
+          <p id="earth-description">地球目前处于能量极度匮乏状态，生态系统静止...</p>
+          <p>当前修复总进度：<span id="earth-progress-val">0%</span></p>
         </div>
-        
+
         <button class="menu-btn" onclick="showScreen('screen-map')">🛰️ 返回星际地图</button>
-    </div>
-</section>
+      </div>
+    </section>
 
     <section id="screen-win" class="screen hidden">
       <h2>✨ 任务完成 ✨</h2>
