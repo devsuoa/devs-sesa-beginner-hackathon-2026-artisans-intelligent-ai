@@ -5,9 +5,96 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>devs-sesa-beginner-hackathon-2026</title>
+
+    <style>
+      body {
+  margin: 0;
+  background-image: url("public/background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+      div.mainStar {
+        background-image: url("public/MainStar.png");
+        background-size: cover;
+        width: 170px;
+        height: 170px;
+        position: fixed;
+        left: 43%;
+        top: 43%;
+      }
+
+      div.subStar1 {
+        background-image: url("public/Substar1.png");
+        background-size: cover;
+        width: 150px;
+        height: 150px;
+        position: fixed;
+        left: 25%;
+        top: 25%;
+
+      }
+
+      div.subStar2 {
+        background-image: url("public/Substar2.png");
+        background-size: cover;
+        width: 150px;
+        height: 150px;
+        position: fixed;
+        left: 15%;
+        top: 60%;
+      }
+
+      div.subStar3 {
+        background-image: url("public/Substar3.png");
+        background-size: cover;
+        width: 150px;
+        height: 150px;
+        position: fixed;
+        left: 36%;
+        top: 75%;
+      }
+
+      div.subStar4 {
+        background-image: url("public/Substar4.png");
+        background-size: cover;
+        width: 150px;
+        height: 150px;
+        position: fixed;
+        left: 65%;
+        top: 25%;
+      }
+
+      div.subStar5 {
+        background-image: url("public/Substar5.png");
+        background-size: cover;
+        width: 150px;
+        height: 150px;
+        position: fixed;
+        left: 75%;
+        top: 60%;
+      }
+
+      div.processBar {
+        background-image: url("public/StarProcess.png");
+        background-size: cover;
+        width: 700px;
+        height: 700px;
+        position: fixed;
+        left: 25%;
+        top: -18%;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
+    <div class = "mainStar"></div>
+    <div class = "subStar1"></div>
+    <div class = "subStar2"></div>
+    <div class = "subStar3"></div>
+    <div class = "subStar4"></div>
+    <div class = "subStar5"></div>
+    <div class = "processBar"></div>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
