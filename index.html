@@ -10,54 +10,69 @@
 </head>
 
 <body>
+
+ 
   <div id="root"></div>
   <script type="module" src="/src/main.tsx"></script>
   <div id="game-container">
     <div id="status-bar" class="hidden">
-      <p>飞船护盾: <span id="shield-display">❤️❤️❤️</span></p>
+      <p>Shield: <span id="shield-display">❤️❤️❤️</span></p>
     </div>
 
     <section id="screen-prologue" class="screen">
-      <h2>📡 远程通讯频道</h2>
+      <button id="skip-prologue-btn" onclick="skipPrologue()">⏭ Skip Story</button>
+      <h2>📡 Telecommunications Channel</h2>
 
       <div id="dialogue-history"></div>
-
-      <button id="start-btn" class="hidden" style="margin-top: 20px;" onclick="startGame()">🚀 启动飞船引擎</button>
+      <div class="prologue-actions">
+        <button id="start-btn" class="hidden" onclick="startGame()">🚀 Let's Go!</button>
+      </div>
     </section>
 
     <section id="screen-map" class="screen hidden">
-      <h2>星系地图：选择你要前往的星球</h2>
+      <h2>Galaxy Map: Select a Planet to Visit</h2>
     </section>
+    <div class="space-effects">
+    <div class="star-field"></div>
+    <div class="shooting-star n1"></div>
+    <div class="shooting-star n2"></div>
+    <div class="shooting-star n3"></div>
+    <div class="shooting-star n4"></div>
+    <div class="shooting-star n5"></div>
+    <div class="shooting-star n6"></div>
+</div>
 
     <section id="screen-quiz" class="screen hidden">
       <div class="quiz-header">
-        <h2 id="planet-name">星球名字</h2>
+        <h2 id="planet-name">Planet Name</h2>
         <div class="planet-avatar">
-          <img id="planet-big-img" src="" alt="星球展示">
+          <img id="planet-big-img" src="" alt="Planet Display">
         </div>
       </div>
 
       <p id="planet-desc" class="planet-description"></p>
-      <p id="question-text" class="question-text">题目加载中...</p>
+      <p id="question-text" class="question-text">Loading question...</p>
 
       <div id="options-container" class="options-container"></div>
     </section>
     <section id="screen-earth-status" class="screen hidden">
-      <h2>🌍 地球当前状态</h2>
+      <h2>🌍 Earth Status</h2>
 
       <div class="earth-status-container">
         <div class="earth-visual">
-          <img src="assets/earth-level1.png" id="earth-large-img" alt="地球状态">
+          <img src="assets/earth-level1.png" id="earth-large-img" alt="Earth Status">
         </div>
 
         <div class="dialogue-box">
-          <p id="earth-description">地球目前处于能量极度匮乏状态，生态系统静止...</p>
-          <p>当前修复总进度：<span id="earth-progress-val">0%</span></p>
+          <p id="earth-description">Earth is currently in a state of extreme energy scarcity, with its ecosystem at a standstill...</p>
+          <p>Current Repair Progress: <span id="earth-progress-val">0%</span></p>
         </div>
 
-        <button class="menu-btn" onclick="showScreen('screen-map')">🛰️ 返回星际地图</button>
+        <button class="menu-btn" onclick="showScreen('screen-map')">🛰️ Return to Galaxy Map</button>
       </div>
     </section>
+
+
 
     <section id="screen-win" class="screen hidden">
       <h2>✨ 任务完成 ✨</h2>
@@ -82,17 +97,25 @@
 
     <div id="modal-progress" class="modal hidden">
       <div class="modal-content">
-        <h3 id="modal-title">星球攻略完毕！</h3>
-        <p>地球修复进度：<span id="progress-text">0%</span></p>
-        <button onclick="returnToMap()">返回星际图</button>
+        <h3 id="modal-title">Answer Successfully</h3>
+        <p>Earth Repair Progress: <span id="progress-text">0%</span></p>
+        <button onclick="returnToMap()">Return to Galaxy Map</button>
       </div>
     </div>
   </div>
 
   </div>
-
+<audio id="game-bgm" loop>
+    <source src="assets/bgm.mp3" type="audio/mpeg">
+    您的浏览器不支持音频播放。
+</audio>
   <script src="data.js"></script>
   <script src="main.js"></script>
+  
+
+<div id="audio-control" onclick="toggleMusic()">
+    <span id="music-icon">🔇</span>
+</div>
 </body>
 
 </html>

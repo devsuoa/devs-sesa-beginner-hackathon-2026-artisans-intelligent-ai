@@ -63,7 +63,7 @@ body {
 }
 
 #shield-display {
-    letter-spacing: 5px; /* 让红心之间有空隙 */
+    letter-spacing: 3px; /* 让红心之间有空隙 */
 }
 
 /* style.css 新增样式 */
@@ -203,6 +203,7 @@ body {
     max-width: 70%; /* 限制宽度，不要占满屏幕 */
 }
 
+
 /* ========================================= */
 /* 主角专属样式 (当这一行带有 .row-player 类时) */
 /* ========================================= */
@@ -258,6 +259,20 @@ body {
     object-fit: contain; /* 保持比例缩放 */
     image-rendering: pixelated; /* 保持像素风清晰度 */
 }
+/* 增加标签显示这是地球 */
+.earth-icon .label {
+    position: absolute;
+    bottom: -30px; /* 标签在图标下方 */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #66fcf1;
+    color: #0b0c10;
+    padding: 5px 10px;
+    font-weight: bold;
+    font-size: 14px;
+    white-space: nowrap; /* 防止标签换行 */
+    text-shadow: 2px 2px 4px #000; /* 增加文字阴影，提升可读性 */
+}
 
 /* 鼠标悬停动画：让玩家知道这是大本营 */
 .earth-icon:hover {
@@ -283,6 +298,38 @@ body {
     transition: transform 0.2s; /* 增加缩放动画 */
 }
 
+.prologue-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+#screen-prologue {
+    position: relative;
+}
+
+#skip-prologue-btn {
+    padding: 12px 22px;
+    font-size: 18px;
+    background-color: rgba(11, 12, 16, 0.85);
+    color: #66fcf1;
+    border: 3px solid #45a29e;
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 2200;
+    cursor: pointer;
+    font-weight: 700;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+#skip-prologue-btn:hover {
+    transform: scale(1.06);
+    border-color: #66fcf1;
+}
+
 /* 鼠标悬停时的效果：稍微变大一点，更有交互感 */
 #start-btn:hover {
     transform: scale(1.1);   /* 放大 1.1 倍 */
@@ -292,6 +339,10 @@ body {
 #screen-map {
     /* 你的地图贴图路径 */
     background-image: url('assets/map.png'); 
+
+    /* 地图文字大小控制：后续只需要改这两个值 */
+    --map-title-size: 44px;
+    --planet-name-size: 20px;
     
     /* 核心代码：让图片自动缩放以填满整个容器，同时保持比例 */
     background-size: cover; 
@@ -306,6 +357,21 @@ body {
     width: 75%;
     height: 90vh; /* 占满整个屏幕高度 */
     position: relative;
+}
+
+#screen-map > h2 {
+    font-size: var(--map-title-size);
+    margin-top: 16px;
+    letter-spacing: 2px;
+}
+
+#screen-quiz {
+    --quiz-question-size: 36px;
+    --quiz-option-size: 24px;
+    --quiz-option-padding-y: 16px;
+    --quiz-option-padding-x: 20px;
+    --game-alert-size: 30px;
+    --achievement-name-size: 36px;
 }
 /* 修改或添加以下 CSS */
 .planet-icon {
@@ -364,7 +430,7 @@ body {
     left: 50%;
     transform: translateX(-50%);
     color: #66fcf1;
-    font-size: 14px;
+    font-size: var(--planet-name-size);
     white-space: nowrap;
     text-shadow: 2px 2px 4px #000;
 }
@@ -407,4 +473,232 @@ body {
     padding: 0 20px;
     text-align: center;
     margin-bottom: 20px;
+}
+
+.question-text {
+    font-size: var(--quiz-question-size);
+    line-height: 1.5;
+    font-weight: 700;
+}
+
+.options-container {
+    display: grid;
+    gap: 14px;
+    width: min(920px, 92%);
+    margin: 0 auto;
+}
+
+.option-btn {
+    font-size: var(--quiz-option-size);
+    padding: var(--quiz-option-padding-y) var(--quiz-option-padding-x);
+    color: #66fcf1;
+    background: rgba(11, 12, 16, 0.85);
+    border: 2px solid #45a29e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.option-btn:hover {
+    transform: translateY(-1px);
+    border-color: #66fcf1;
+    box-shadow: 0 0 14px rgba(102, 252, 241, 0.35);
+}
+
+.game-alert-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+.game-alert-box {
+    max-width: min(760px, 92vw);
+    background: rgba(11, 12, 16, 0.95);
+    border: 3px solid #66fcf1;
+    border-radius: 12px;
+    padding: 22px 26px;
+    box-shadow: 0 0 22px rgba(102, 252, 241, 0.45);
+}
+
+#game-alert-text {
+    margin: 0;
+    text-align: center;
+    color: #66fcf1;
+    font-size: var(--game-alert-size);
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.achievement-overlay {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    z-index: 3200;
+    pointer-events: none;
+}
+
+.achievement-card {
+    width: min(420px, 92vw);
+    background: linear-gradient(160deg, rgba(11, 12, 16, 0.98), rgba(18, 33, 40, 0.98));
+    border: 3px solid #f6d860;
+    border-radius: 14px;
+    padding: 18px 20px;
+    text-align: left;
+    box-shadow: 0 0 24px rgba(246, 216, 96, 0.5);
+    animation: achievement-slide-in 0.35s ease-out;
+}
+
+@keyframes achievement-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(20px) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0) translateY(0);
+    }
+}
+
+.achievement-badge {
+    margin: 0 0 10px;
+    color: #f6d860;
+    letter-spacing: 2px;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+#achievement-name {
+    margin: 0;
+    color: #fff4b1;
+    font-size: var(--achievement-name-size);
+    line-height: 1.35;
+}
+
+.achievement-desc {
+    margin: 8px 0 0;
+    color: #66fcf1;
+    font-size: 16px;
+}
+/* --- 唯美流星雨特效 --- */
+
+.space-effects {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+/* 星星保持原地微弱呼吸 */
+.star-field {
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow: 
+        10vw 15vh #fff, 25vw 35vh #fff, 40vw 10vh #fff, 60vw 25vh #fff, 
+        85vw 10vh #fff, 15vw 55vh #fff, 35vw 75vh #fff, 55vw 60vh #fff,
+        75vw 85vh #fff, 95vw 55vh #fff, 5vw 90vh #fff, 20vw 85vh #fff,
+        45vw 45vh #66fcf1, 80vw 40vh #66fcf1, 70vw 15vh #fff, 12vw 12vh #fff;
+    animation: starBreath 6s ease-in-out infinite;
+}
+
+@keyframes starBreath {
+    0%, 100% { opacity: 0.1; }
+    50% { opacity: 0.6; }
+}
+
+/* 🌟 流星：加长拖尾，优化发光 */
+.shooting-star {
+    position: absolute;
+    width: 200px; /* 拉长拖尾 */
+    height: 1.5px; /* 更细一点显得更优雅 */
+    background: linear-gradient(90deg, rgba(255,255,255,0.8), transparent);
+    box-shadow: 0 0 15px rgba(102, 252, 243, 0.2);
+    opacity: 0;
+    transform: rotate(-35deg); /* 角度调平一点点，划过的路程视觉上更长 */
+    pointer-events: none;
+}
+
+/* 🌟 核心唯美动画：大幅增加时长，增加排队等待时间 */
+@keyframes beautifulMeteor {
+    0% {
+        transform: rotate(-35deg) translateX(0);
+        opacity: 0;
+    }
+    1% {
+        opacity: 0;
+    }
+    10% {
+        opacity: 1; /* 慢慢亮起 */
+    }
+    35% {
+        /* 15s 的 35% 约为 5s，5秒划完全屏，速度非常柔和 */
+        transform: rotate(-35deg) translateX(-120vw);
+        opacity: 0;
+    }
+    100% {
+        transform: rotate(-35deg) translateX(-120vw);
+        opacity: 0;
+    }
+}
+
+/* 为 6 颗流星设置不同的节奏，时长都在 12s-20s 之间 */
+.n1 { top: 0%;   left: 100%; animation: beautifulMeteor 15s linear infinite; }
+.n2 { top: 15%;  left: 95%;  animation: beautifulMeteor 18s linear infinite 4s; }
+.n3 { top: 30%;  left: 110%; animation: beautifulMeteor 14s linear infinite 8s; }
+.n4 { top: 5%;   left: 70%;  animation: beautifulMeteor 20s linear infinite 2s; }
+.n5 { top: -10%; left: 85%;  animation: beautifulMeteor 16s linear infinite 11s; }
+.n6 { top: 25%;  left: 120%; animation: beautifulMeteor 17s linear infinite 6s; }
+
+#audio-control {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(102, 252, 243, 0.2);
+    border: 2px solid #66fcf1;
+    color: #66fcf1;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 20px;
+    border-radius: 5px;
+}
+
+#audio-control:hover {
+    background: rgba(102, 252, 243, 0.4);
+}
+
+/* 地球状态页面的贴图容器 - 与地图尺寸保持一致 */
+.earth-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-height: calc(100vh - 80px);
+}
+
+.earth-visual {
+    width: 75%;
+    max-width: 900px;
+    aspect-ratio: 16 / 9;
+    position: relative;
+    overflow: hidden;
+    /*border: 2px solid #45a29e;*/
+}
+
+#earth-large-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    image-rendering: pixelated;
 }
